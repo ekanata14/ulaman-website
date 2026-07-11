@@ -1,13 +1,22 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "ekanata/gretiva",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Laravel 12 Hybrid Action-Oriented starter template with Livewire 4, Mary UI, role-based access, and a hybrid i18n system.",
     "keywords": [
         "laravel",
-        "framework"
+        "livewire",
+        "template",
+        "action-oriented",
+        "i18n"
     ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Eka Nata",
+            "homepage": "https://github.com/ekanata14"
+        }
+    ],
     "require": {
         "php": "^8.2",
         "laravel/fortify": "^1.30",

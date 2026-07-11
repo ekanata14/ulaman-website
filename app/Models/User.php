@@ -1,61 +1,56 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail; // 1. Import ini
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Translatable\HasTranslations;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasTranslations;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'profile_photo', 'timezone', 'locale', 'preferences'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'profile_photo',
+        'departments',
+        'timezone',
+        'locale',
+        'preferences',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
-    // Tambahkan casting
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'preferences' => 'array', // PENTING: Cast ke array
+        'departments' => 'array',
+        'preferences' => 'array',
         'timezone' => 'string',
         'locale' => 'string',
     ];
 
-    // Relasi: Penulis punya banyak berita
-    public function news()
+    public function isSuperAdmin(): bool
     {
-        return $this->hasMany(News::class, 'author_id');
-    }
-
-    // Relasi: User punya banyak komentar
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-
-    // Helper check admin
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
+        return $this->role === 'super_admin';
     }
 
     /**
-     * Helper untuk mengambil inisial nama (Untuk profile_photo).
-     * Contoh: "Budi Santoso" -> "BS", "Admin" -> "AD"
+     * Returns initials from the user's name (e.g. "John Doe" → "JD", "Admin" → "AD").
      */
-    public function initials()
+    public function initials(): string
     {
         $words = explode(' ', $this->name);
 
-        // Jika nama terdiri dari 2 kata atau lebih (Contoh: Budi Santoso)
         if (count($words) >= 2) {
             return strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1));
         }
 
-        // Jika hanya 1 kata (Contoh: Admin), ambil 2 huruf pertama
         return strtoupper(substr($this->name, 0, 2));
     }
 }

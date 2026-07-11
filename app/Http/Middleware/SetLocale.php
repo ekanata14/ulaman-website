@@ -9,21 +9,20 @@ use Illuminate\Support\Facades\Session;
 
 class SetLocale
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
-        $locale = config('app.locale'); // Default (en/id)
+        $locale = config('app.locale');
 
-        // 1. Cek Session (Prioritas Tertinggi - User baru ganti bahasa)
+        // Session has highest priority (user just switched locale)
         if (Session::has('locale')) {
             $locale = Session::get('locale');
         }
-        // 2. Cek Database (Jika user login tapi session habis)
+        // Fall back to the authenticated user's saved locale and sync it to the session
         elseif (auth()->check() && auth()->user()->locale) {
             $locale = auth()->user()->locale;
-            Session::put('locale', $locale); // Sync ke session
+            Session::put('locale', $locale);
         }
 
-        // Terapkan Bahasa
         App::setLocale($locale);
 
         return $next($request);

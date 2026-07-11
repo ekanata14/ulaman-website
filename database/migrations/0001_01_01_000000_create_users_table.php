@@ -17,9 +17,10 @@ return new class extends Migration {
             $table->string('password');
             $table->string('profile_photo')->nullable();
             $table->enum('role', ['super_admin', 'user'])->default('user');
-            $table->string('locale', 5)->default('id'); // id, en, jp
+            $table->string('locale', 5)->default('id'); // e.g. id, en
             $table->string('timezone')->nullable();
-            $table->json('preferences')->nullable(); // Dark mode, notif, dll
+            $table->json('departments')->nullable();
+            $table->json('preferences')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken(); // Add this line
             $table->timestamps();
