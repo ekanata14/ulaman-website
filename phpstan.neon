@@ -1,0 +1,15 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    # Debt template lama di-grandfather; kode UPL baru tetap ditegakkan level 5.
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    checkModelProperties: true
+
+    excludePaths:
+        - app/Actions/**/.gitkeep

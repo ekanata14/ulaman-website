@@ -44,16 +44,32 @@
             </div>
 
             {{-- MENU --}}
+            @php($role = auth()->user()->role)
             <x-menu activate-by-route active-bg-color="bg-primary text-primary-content rounded" class="gap-1 px-3 mt-4">
-                {{-- Role: Super Admin --}}
-                @if (auth()->user()->role === 'super_admin')
-                    <x-menu-item title="Dashboard" icon="o-home" link="{{ route('admin.dashboard') }}" />
-                    <x-menu-item title="Users" icon="o-users" link="{{ route('admin.users') }}" />
+                {{-- Admin & Super Admin: area operasional UPL --}}
+                @if (in_array($role, ['super_admin', 'admin'], true))
+                    <x-menu-item title="{{ __('Dashboard') }}" icon="o-home" link="{{ route('admin.dashboard') }}" />
+                    <x-menu-item title="{{ __('Purchase Notes') }}" icon="o-document-text"
+                        link="{{ route('admin.purchases') }}" />
+
+                    <x-menu-separator title="{{ __('Master Data') }}" />
+                    <x-menu-item title="{{ __('Suppliers') }}" icon="o-building-storefront"
+                        link="{{ route('admin.suppliers') }}" />
+                    <x-menu-item title="{{ __('Items') }}" icon="o-cube" link="{{ route('admin.items') }}" />
+                    <x-menu-item title="{{ __('Units') }}" icon="o-scale" link="{{ route('admin.units') }}" />
+                    <x-menu-item title="{{ __('Categories') }}" icon="o-tag" link="{{ route('admin.categories') }}" />
+
+                    <x-menu-separator title="{{ __('Tools') }}" />
+                    <x-menu-item title="{{ __('Import Excel') }}" icon="o-arrow-up-tray"
+                        link="{{ route('admin.import') }}" />
+                    <x-menu-item title="{{ __('Audit Log') }}" icon="o-clipboard-document-list"
+                        link="{{ route('admin.audit-logs') }}" />
                 @endif
 
-                {{-- Role: User --}}
-                @if (auth()->user()->role === 'user')
-                    <x-menu-item title="Dashboard" icon="o-home" link="{{ route('user.dashboard') }}" />
+                {{-- Khusus Super Admin --}}
+                @if ($role === 'super_admin')
+                    <x-menu-separator title="{{ __('Administration') }}" />
+                    <x-menu-item title="{{ __('Users') }}" icon="o-users" link="{{ route('admin.users') }}" />
                 @endif
 
                 <hr class="my-3 border-base-300">

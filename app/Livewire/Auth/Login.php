@@ -4,12 +4,12 @@ namespace App\Livewire\Auth;
 
 use App\Actions\Auth\LoginAction;
 use App\DTOs\Auth\LoginData;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Validate;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Mary\Traits\Toast;
-use Illuminate\Validation\ValidationException;
 
 #[Layout('layouts.guest')]
 #[Title('Login Page')]

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
@@ -17,6 +17,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'is_active',
+        'last_login_at',
         'profile_photo',
         'departments',
         'timezone',
@@ -28,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'is_active' => 'boolean',
         'password' => 'hashed',
         'departments' => 'array',
         'preferences' => 'array',
@@ -40,6 +44,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'super_admin';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     /**
      * Returns initials from the user's name (e.g. "John Doe" → "JD", "Admin" → "AD").
      */
@@ -48,7 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $words = explode(' ', $this->name);
 
         if (count($words) >= 2) {
-            return strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1));
+            return strtoupper(substr($words[0], 0, 1).substr(end($words), 0, 1));
         }
 
         return strtoupper(substr($this->name, 0, 2));

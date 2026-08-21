@@ -3,7 +3,7 @@
 use App\Services\AutoTranslationService;
 
 beforeEach(function () {
-    $this->service = new AutoTranslationService();
+    $this->service = new AutoTranslationService;
 });
 
 it('returns data unchanged when both locales are present', function () {

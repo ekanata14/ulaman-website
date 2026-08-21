@@ -48,7 +48,7 @@ class AutoTranslateJson extends Command
         $bar->start();
 
         // Assumes the source strings in Blade files are in English
-        $tr = new GoogleTranslate();
+        $tr = new GoogleTranslate;
         $tr->setSource('en');
         $tr->setTarget($locale);
 

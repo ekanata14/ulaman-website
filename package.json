@@ -9,8 +9,11 @@
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
+        "browser-image-compression": "^2.0.2",
+        "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0",
+        "sortablejs": "^1.15.7",
         "vite": "^7.0.4"
     },
     "optionalDependencies": {

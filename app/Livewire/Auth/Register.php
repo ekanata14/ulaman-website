@@ -5,8 +5,8 @@ namespace App\Livewire\Auth;
 use App\Actions\Auth\RegisterUserAction;
 use App\DTOs\Auth\RegisterData;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Validate;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Mary\Traits\Toast;
 

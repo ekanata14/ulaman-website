@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Events\PurchaseSaved;
+use App\Listeners\SyncItemLastPrice;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,12 +35,15 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        // Cegah lazy loading (anti N+1) di luar produksi — §22.D#10.
+        Model::preventLazyLoading(! app()->isProduction());
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
 
         Password::defaults(
-            fn(): ?Password => app()->isProduction()
+            fn (): ?Password => app()->isProduction()
             ? Password::min(12)
                 ->mixedCase()
                 ->letters()
@@ -51,5 +58,8 @@ class AppServiceProvider extends ServiceProvider
             'report' => 'App\Models\JobdeskReport',
             // 'jobdesk' => 'App\Models\Jobdesk', // Jika jobdesk punya attachment langsung
         ]);
+
+        // UPL: perbarui harga terakhir item setiap nota tersimpan (§10.4).
+        Event::listen(PurchaseSaved::class, SyncItemLastPrice::class);
     }
 }

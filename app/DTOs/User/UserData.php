@@ -11,6 +11,5 @@ class UserData
         public ?string $password = null,
         public mixed $profile_photo = null,
         public array $departments = [],
-    ) {
-    }
+    ) {}
 }

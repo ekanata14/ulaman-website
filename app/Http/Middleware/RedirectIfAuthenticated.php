@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfAuthenticated
 {
@@ -24,7 +24,7 @@ class RedirectIfAuthenticated
                 $user = Auth::user();
                 if ($user->role === 'super_admin') {
                     return redirect('/admin/dashboard'); // Dashboard Adm
-                } else if ($user->role === 'user') {
+                } elseif ($user->role === 'user') {
                     return redirect('/user/dashboard'); // Dashboard User
                 }
 

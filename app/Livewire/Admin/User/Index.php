@@ -2,20 +2,20 @@
 
 namespace App\Livewire\Admin\User;
 
-use App\Models\User;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\WithFileUploads;
-use Livewire\Attributes\Url;
 use App\Actions\User\CreateUserAction;
-use App\Actions\User\UpdateUserAction;
 use App\Actions\User\DeleteUserAction;
-use Mary\Traits\Toast;
+use App\Actions\User\UpdateUserAction;
 use App\DTOs\User\UserData;
+use App\Models\User;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
+use Mary\Traits\Toast;
 
 class Index extends Component
 {
-    use WithPagination, WithFileUploads, Toast;
+    use Toast, WithFileUploads, WithPagination;
 
     // --- FILTER PROPERTIES (Tersimpan di URL) ---
     #[Url(history: true)]
@@ -32,20 +32,28 @@ class Index extends Component
 
     // --- MODAL STATES ---
     public bool $modalOpen = false;
+
     public bool $deleteModalOpen = false;
 
     // (filterDrawerOpen sudah dihapus)
 
     public ?int $editingUserId = null;
+
     public ?int $userToDeleteId = null;
 
     // --- FORM DATA ---
     public string $name = '';
+
     public string $email = '';
+
     public string $role = 'staff';
+
     public array $departments = [];
+
     public string $password = '';
+
     public $profile_photo;
+
     public ?string $existing_photo = null;
 
     // --- MASTER DATA ---
@@ -60,7 +68,7 @@ class Index extends Component
     {
         return [
             'name' => 'required|min:3',
-            'email' => 'required|email|unique:users,email,' . $this->editingUserId,
+            'email' => 'required|email|unique:users,email,'.$this->editingUserId,
             'role' => 'required',
             'departments' => 'nullable|array',
             'password' => $this->editingUserId ? 'nullable|min:6' : 'required|min:6',
@@ -151,8 +159,8 @@ class Index extends Component
 
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -174,7 +182,7 @@ class Index extends Component
         $users = $query->paginate(10);
 
         return view('livewire.admin.user.index', [
-            'users' => $users
+            'users' => $users,
         ]);
     }
 }

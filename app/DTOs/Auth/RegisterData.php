@@ -8,6 +8,5 @@ class RegisterData
         public string $name,
         public string $email,
         public string $password,
-    ) {
-    }
+    ) {}
 }

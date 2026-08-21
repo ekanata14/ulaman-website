@@ -46,5 +46,8 @@ jobs:
       - name: Build Assets
         run: npm run build
 
+      - name: Run Static Analysis (Larastan)
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
       - name: Run Tests
         run: ./vendor/bin/pest

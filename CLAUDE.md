@@ -68,3 +68,67 @@ Mary UI components (`<x-...>`, Mary traits like `Toast`) over Tailwind v4 + Dais
 - `app/Concerns/` holds shared validation rule traits (`PasswordValidationRules`, `ProfileValidationRules`); `app/Http/Requests/` holds FormRequests for non-Livewire validation.
 - Laravel Boost MCP is configured — prefer its `search-docs`, `tinker`, `database-query`, and `list-artisan-commands` tools for Laravel ecosystem work.
 
+---
+
+# Ulaman Purchase Log (UPL) — Project Extension
+
+> Section ini DITAMBAHKAN di atas template Gretiva. Konvensi Gretiva di atas tetap berlaku penuh.
+
+## Konteks Proyek
+Ulaman Purchase Log adalah sistem pencatatan pembelian barang proyek renovasi Ulaman, dibangun DI ATAS template ini. Publik (Guest, tanpa login) menelusuri nota/laporan; Admin & Super Admin mengelola nota, diskon/bundle, foto nota, master data, impor Excel, dan audit log. Sumber data awal: `docs/Ulaman Renovation.xlsx` (16 sheet, ±730 item, pola "Date & Supplier hanya diisi di baris pertama tiap nota").
+
+## Keputusan Rekonsiliasi (final — jangan dibahas ulang)
+- Stack: **Laravel 12 + Livewire 4 + Fortify + Mary UI** (BUKAN Laravel 11/Breeze). Jangan `laravel new`, jangan pasang Breeze.
+- Action: **kelas polos, satu method `execute(DTO)`, method-injected** (pola template). BUKAN lorisleiva. §22.D#2 dibaca "satu public method `execute()`".
+- DTO: **polos constructor-promoted di `app/DTOs/{Domain}/`** (BUKAN `app/Data`/spatie-data). Uang & qty bertipe `string` di DTO demi presisi bcmath.
+- Folder Action per domain di `app/Actions/{Calculation,Purchase,Photo,Supplier,Item,Import,Report,Export,Maintenance}/` + `Actions/Concerns/`. `app/Actions/Fortify` milik template — jangan diutak-atik.
+- Role: **`super_admin|admin`** (migrasi ubah enum template `user`→`admin`); area admin = `role:super_admin|admin`.
+- Uang: **DECIMAL(18,2) + bcmath + `App\Support\Money`**; pembulatan **half-up** ke rupiah bulat; cast Eloquent `decimal:2`.
+- Auth: Fortify existing; **registrasi publik dimatikan**; sesi 8 jam; rate-limit 5 gagal/15 mnt; argon2id; pesan gagal generik.
+- Area Guest publik (`/`, `/nota/{id}`, `/laporan`) TANPA middleware auth.
+- Tabel `users` simpan `name` (Inggris); migrasi baru tambah `is_active` + `last_login_at`. Tabel domain baru pakai nama kolom Indonesia (§8).
+- Tooling: Pest 4 (existing) + **Larastan** (`phpstan.neon` level 5 + `phpstan-baseline.neon` untuk debt template lama) di DoD & CI. Pint preset `laravel`. Analisis jalankan dengan `--memory-limit=1G`.
+- Paket terpasang di Fase 0 (Q1 dipertahankan — TANPA lorisleiva/spatie-data): `maatwebsite/excel`, `intervention/image`, `barryvdh/laravel-dompdf`, dev `larastan/larastan` + `pestphp/pest-plugin-livewire`; JS `browser-image-compression`, `sortablejs`, `chart.js`.
+
+## Larangan Mutlak
+1. **DILARANG `float`/`double` untuk uang.** Wajib `bcmath` + `DECIMAL(18,2)` + cast `decimal:2`. Uang mengalir sebagai `string`.
+2. **DILARANG logika bisnis / aritmetika uang di komponen Livewire.** Komponen hanya state form, validasi presentasi, panggil Action, render.
+3. **DILARANG business rule di model event Eloquent** (`saving`/`saved`/observer). Total dihitung Action, bukan model.
+4. **DILARANG `request()`/`auth()`/`session()` di dalam `execute()` Action.** User yang bertindak dioper sebagai parameter eksplisit.
+5. **DILARANG `DB::transaction()` di luar Action orchestrator.** Sub-action tidak membuka transaksi sendiri.
+6. Kalkulator (`app/Actions/Calculation/*`) **tidak menyentuh DB** — input array/DTO, output DTO, unit-test 100%.
+7. Komponen Guest **tanpa method mutasi** apa pun.
+
+## Checklist Arsitektur (§22.D — wajib lulus tiap review)
+1. Tidak ada operasi uang di `app/Livewire/**`.
+2. Tiap Action tepat satu public method (`execute()`).
+3. Tidak ada `request()`/`auth()`/`session()` di dalam `execute()`.
+4. `DB::transaction()` hanya di Action orchestrator.
+5. Tiap invariant §7 divalidasi di Action, bukan hanya di Form Object.
+6. Tiap baris Livewire dinamis punya `wire:key` berbasis `uid`, bukan index array.
+7. Tidak ada business rule di model event Eloquent.
+8. Semua nilai uang `string`/`decimal`, tanpa float.
+9. Komponen Guest tanpa method mutasi.
+10. Eager loading di tiap query list (anti N+1).
+
+## Asumsi dari Default PRD §20 (dicatat, bukan diputuskan ulang)
+- Q6 Satuan **opsional/nullable** (data lama tak punya unit).
+- Q7 Seed **2–3 akun admin** (1 super_admin + contoh).
+- Q8 `purchases.project_id` **nullable disiapkan sekarang**, UI multi-proyek nanti.
+- Q9 Diskon tingkat nota **masuk MVP** (prioritas Should) — dibangun di mesin Fase 1.
+- Q10 **Tanpa PPN/VAT** di MVP.
+- Q1/Q2/Q3 Ketidakcocokan data (merge supplier, selisih total, tahun salah) → tandai `needs_review`, koreksi manual pasca-impor.
+- Q4/Q5 Guest boleh unduh & lihat Foto Nota, default aktif + bisa dimatikan via setting (Fase 4/5).
+- Q11 Hosting VPS + Forge + Redis (fase deploy).
+
+## Perintah Verifikasi (wajib lulus sebelum fitur dianggap selesai)
+```bash
+composer lint                                   # Pint apply
+composer test                                   # config:clear -> pint --test -> artisan test
+php artisan test --compact --filter=NamaTest    # test spesifik (Pest)
+./vendor/bin/pest                               # sesuai gate CI
+vendor/bin/phpstan analyse                       # Larastan (setelah ditambahkan)
+php artisan purchase:verify-totals              # invariant §7: Sum(net_item) == grand_total
+```
+Definition of Done per fitur: Action ada test · komponen Livewire ada test · Larastan clean · Pint clean · validasi server penuh · tanpa N+1 · uang bebas float.
+

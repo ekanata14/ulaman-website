@@ -2,10 +2,6 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Announcement;
-use App\Models\Attendance;
-use App\Models\Jobdesk;
-use App\Models\Project;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -21,8 +17,11 @@ class GlobalSearch extends Component
 
     // --- FILTERS (Advanced Filtering per category) ---
     public string $filterUserRole = '';
+
     public string $filterProjectStatus = '';
+
     public string $filterTaskStatus = '';
+
     public string $filterAttDate = '';
 
     public function mount()
@@ -42,7 +41,7 @@ class GlobalSearch extends Component
                 ->where('name', 'like', "%$term%")
                 ->orWhere('email', 'like', "%$term%")
                 // Advanced Filter: Role
-                ->when($this->filterUserRole, fn($q) => $q->where('role', $this->filterUserRole))
+                ->when($this->filterUserRole, fn ($q) => $q->where('role', $this->filterUserRole))
                 ->limit(10)
                 ->get();
         }

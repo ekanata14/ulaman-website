@@ -2,8 +2,8 @@
 
 namespace App\Actions\User;
 
-use App\Models\User;
 use App\DTOs\User\UserData;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 class UpdateUserAction

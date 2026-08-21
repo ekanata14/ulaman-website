@@ -11,7 +11,7 @@ class DeleteUserAction
     {
         // Proteksi: Admin tidak boleh menghapus dirinya sendiri
         if ($user->id === auth()->id()) {
-            throw new \Exception("Anda tidak bisa menghapus akun sendiri.");
+            throw new \Exception('Anda tidak bisa menghapus akun sendiri.');
         }
 
         // Delete profile photo from storage

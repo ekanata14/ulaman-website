@@ -2,33 +2,43 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\User;
-use App\Models\Project;
-use App\Models\Jobdesk;
-use App\Models\Attendance;
-use App\Models\Announcement;
-use Livewire\Component;
+use App\Actions\Report\GetMonthlyTrend;
+use App\Actions\Report\GetPurchaseSummary;
+use App\Actions\Report\GetSupplierRanking;
+use App\DTOs\Purchase\PurchaseFilterData;
+use App\Models\Purchase;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Component;
 
+/**
+ * §F-07 — Dashboard admin UPL: ringkasan all-time, tren bulanan, peringkat
+ * supplier, alert nota perlu-review, dan nota terbaru. Komponen tipis: hanya
+ * otorisasi + memanggil Query Action + render.
+ */
 #[Layout('layouts.app')]
-#[Title('Admin Dashboard')]
+#[Title('Dashboard')]
 class Dashboard extends Component
 {
-    public function render()
+    use AuthorizesRequests;
+
+    public function mount(): void
     {
-        // 1. STATISTIK UTAMA
-        $stats = [
-            'total_staff' => User::where('role', 'staff')->count(),
-        ];
+        $this->authorize('viewAny', Purchase::class);
+    }
 
-        // 4. USER TERBARU
-        $recentUsers = User::latest()->take(5)->get();
-
+    public function render(): View
+    {
+        $filter = new PurchaseFilterData;
 
         return view('livewire.admin.dashboard', [
-            'stats' => $stats,
-            'recentUsers' => $recentUsers,
+            'summary' => app(GetPurchaseSummary::class)->execute($filter),
+            'trend' => app(GetMonthlyTrend::class)->execute($filter),
+            'ranking' => app(GetSupplierRanking::class)->execute($filter, 5),
+            'needsReviewCount' => Purchase::query()->where('needs_review', true)->count(),
+            'recent' => Purchase::query()->final()->with('supplier')->latest('tanggal')->limit(8)->get(),
         ]);
     }
 }
