@@ -1,4 +1,4 @@
-# Gretiva — Laravel 12 Hybrid Action-Oriented Template
+# Ulaman — Laravel 12 Hybrid Action-Oriented Template
 
 A production-ready Laravel 12 starter template built with **Livewire 4**, **Mary UI**, and a clean **Action/DTO architecture**. Ships with role-based access control, email verification, user management, and a full **hybrid i18n system** (static UI translations + dynamic DB content with Google Translate auto-fill).
 
@@ -71,7 +71,7 @@ Configure your database in `.env`:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_DATABASE=gretiva
+DB_DATABASE=ulaman
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -84,7 +84,7 @@ npm install && npm run build
 ```
 
 **Default admin credentials:**
-- Email: `admin@gretiva.com`
+- Email: `admin@ulaman.com`
 - Password: `password`
 
 ### Development

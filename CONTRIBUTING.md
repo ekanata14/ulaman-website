@@ -1,4 +1,4 @@
-# Contributing to Gretiva
+# Contributing to Ulaman
 
 Thank you for your interest in contributing!
 

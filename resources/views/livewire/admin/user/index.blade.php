@@ -2,7 +2,9 @@
     {{-- HEADER --}}
     <x-header title="{{ __('User Management') }}" subtitle="{{ __('Registered accounts') }}" separator progress-indicator>
         <x-slot:actions>
-            <x-button label="{{ __('Add User') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            <span data-tour="user-add">
+                <x-button label="{{ __('Add User') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            </span>
         </x-slot:actions>
     </x-header>
 
@@ -41,7 +43,7 @@
     </div>
 
     {{-- CARD TABEL --}}
-    <x-card class="bg-base-100 shadow-sm">
+    <x-card class="bg-base-100 shadow-sm" data-tour="user-table">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -117,7 +119,7 @@
 
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingUserId ? __('Edit User') : __('Add User')" separator>
-        <x-form wire:submit="save">
+        <x-form wire:submit="confirmSave">
 
             {{-- Foto Profil --}}
             <div class="flex items-center gap-4 mb-4">
@@ -162,4 +164,8 @@
     <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Delete User?') }}"
         text="{{ __('Are you sure you want to delete this user?') }}" confirm-text="{{ __('Yes, Delete') }}"
         method="delete" />
+
+    {{-- MODAL KONFIRMASI GENERIK --}}
+    <x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+        :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
 </div>

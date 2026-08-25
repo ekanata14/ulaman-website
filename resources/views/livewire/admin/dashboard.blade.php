@@ -10,7 +10,7 @@
     </x-header>
 
     {{-- SUMMARY STAT CARDS --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-tour="dash-stats">
         <x-stat title="{{ __('Total Spending') }}" value="{{ Money::format($summary->total) }}" icon="o-banknotes"
             class="bg-base-100 shadow-sm border-l-4 border-primary" color="text-primary" />
         <x-stat title="{{ __('Total Notes') }}" value="{{ number_format($summary->notaCount, 0, ',', '.') }}"
@@ -43,73 +43,23 @@
         </x-card>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" data-tour="dash-chart">
         {{-- MONTHLY TREND CHART --}}
         <x-card title="{{ __('Monthly Trend') }}" class="bg-base-100 shadow-sm lg:col-span-2">
             @if (count($trend) === 0)
                 <div class="py-10 text-center text-gray-500">{{ __('No data available yet.') }}</div>
             @else
-                <div class="overflow-x-auto">
-                    <div wire:ignore class="min-w-[480px]" x-data="{
-                        chart: null,
-                        labels: @js(array_map(fn($t) => $t['label'], $trend)),
-                        totals: @js(array_map(fn($t) => (float) $t['total'], $trend)),
-                        currency: @js(__('Total')),
-                    }">
-                        <canvas x-ref="canvas" height="120"></canvas>
+                <div class="flex-1 flex flex-col min-h-0">
+                    <div class="overflow-x-auto flex-1 min-h-0">
+                        <div wire:ignore class="relative h-full min-h-[16rem] min-w-[480px]" x-data="spendingChart(@js([
+                            'labels' => array_map(fn($t) => $t['label'], $trend),
+                            'totals' => array_map(fn($t) => (float) $t['total'], $trend),
+                            'currency' => __('Total'),
+                        ]))">
+                            <canvas x-ref="canvas"></canvas>
+                        </div>
                     </div>
                 </div>
-
-                @script
-                    <script type="module">
-                        import Chart from 'chart.js/auto';
-
-                        const build = (el) => {
-                            const state = Alpine.$data(el);
-                            if (state.chart) {
-                                state.chart.destroy();
-                            }
-                            const ctx = el.querySelector('canvas');
-                            if (!ctx) return;
-                            state.chart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: state.labels,
-                                    datasets: [{
-                                        label: state.currency,
-                                        data: state.totals,
-                                        backgroundColor: 'oklch(0.55 0.2 260 / 0.7)',
-                                        borderRadius: 4,
-                                    }],
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: (c) => 'Rp ' + new Intl.NumberFormat('id-ID').format(c.parsed.y),
-                                            },
-                                        },
-                                    },
-                                    scales: {
-                                        y: {
-                                            ticks: {
-                                                callback: (v) => 'Rp ' + new Intl.NumberFormat('id-ID', {
-                                                    notation: 'compact',
-                                                }).format(v),
-                                            },
-                                        },
-                                    },
-                                },
-                            });
-                        };
-
-                        const el = $wire.el.querySelector('[x-ref="canvas"]')?.closest('[x-data]');
-                        if (el) build(el);
-                    </script>
-                @endscript
             @endif
         </x-card>
 
@@ -143,7 +93,7 @@
     </div>
 
     {{-- RECENT NOTES --}}
-    <x-card title="{{ __('Recent Notes') }}" class="bg-base-100 shadow-sm">
+    <x-card title="{{ __('Recent Notes') }}" class="bg-base-100 shadow-sm" data-tour="dash-recent">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>

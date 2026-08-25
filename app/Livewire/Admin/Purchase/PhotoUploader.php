@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Purchase;
 use App\Actions\Photo\DeleteNotaPhoto;
 use App\Actions\Photo\GenerateSignedPhotoUrl;
 use App\Actions\Photo\StoreNotaPhoto;
+use App\Concerns\WithConfirmation;
 use App\Models\Purchase;
 use App\Models\PurchasePhoto;
 use App\Models\User;
@@ -21,7 +22,7 @@ use Mary\Traits\Toast;
  */
 class PhotoUploader extends Component
 {
-    use AuthorizesRequests, Toast, WithFileUploads;
+    use AuthorizesRequests, Toast, WithConfirmation, WithFileUploads;
 
     public Purchase $purchase;
 
@@ -54,6 +55,19 @@ class PhotoUploader extends Component
 
         $this->photos = [];
         $this->success(__('Photos uploaded.'));
+    }
+
+    public function confirmDeletePhoto(int $id): void
+    {
+        $this->askConfirm(
+            'deletePhoto',
+            [$id],
+            __('Delete this photo?'),
+            __('This photo will be permanently removed.'),
+            true,
+            'o-trash',
+            __('Yes, Delete'),
+        );
     }
 
     public function deletePhoto(int $id): void

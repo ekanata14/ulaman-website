@@ -4,12 +4,14 @@ namespace App\Livewire\Guest;
 
 use App\Actions\Report\GetPurchaseItemList;
 use App\Actions\Report\GetPurchaseList;
+use App\Actions\Report\GetPurchaseNotasForSpreadsheet;
 use App\DTOs\Purchase\PurchaseFilterData;
 use App\Models\Category;
 use App\Models\Supplier;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -56,6 +58,24 @@ class PurchaseBrowser extends Component
     #[Url(history: true)]
     public int $perPage = 50;
 
+    /** State presentasi murni: buka/tutup modal filter (bukan mutasi data). */
+    public bool $showFilters = false;
+
+    /**
+     * Jumlah filter aktif — untuk badge tombol Filter. Bukan mutasi data.
+     */
+    public function activeFilterCount(): int
+    {
+        return collect([
+            filled($this->startDate),
+            filled($this->endDate),
+            count($this->supplierIds) > 0,
+            count($this->categoryIds) > 0,
+            filled($this->search),
+            $this->onlyWithPhoto,
+        ])->filter()->count();
+    }
+
     public function updated(string $property): void
     {
         if (in_array($property, [
@@ -64,6 +84,34 @@ class PurchaseBrowser extends Component
         ], true)) {
             $this->resetPage();
         }
+    }
+
+    /**
+     * Terapkan filter dari hasil pencarian global (event dari Guest\GlobalSearch).
+     * Hanya menyetel state filter/presentasi — bukan mutasi data.
+     */
+    #[On('guest-filter-supplier')]
+    public function applySupplier(int $id): void
+    {
+        $this->supplierIds = [$id];
+        $this->viewMode = 'nota';
+        $this->resetPage();
+    }
+
+    #[On('guest-filter-category')]
+    public function applyCategory(int $id): void
+    {
+        $this->categoryIds = [$id];
+        $this->viewMode = 'nota';
+        $this->resetPage();
+    }
+
+    #[On('guest-search-items')]
+    public function applyItemSearch(string $term): void
+    {
+        $this->search = $term;
+        $this->viewMode = 'item';
+        $this->resetPage();
     }
 
     public function applyPreset(string $preset): void
@@ -121,9 +169,11 @@ class PurchaseBrowser extends Component
     {
         $filter = $this->filter();
 
-        $rows = $this->viewMode === 'item'
-            ? app(GetPurchaseItemList::class)->execute($filter)->paginate($this->perPage)
-            : app(GetPurchaseList::class)->execute($filter)->paginate($this->perPage);
+        $rows = match ($this->viewMode) {
+            'item' => app(GetPurchaseItemList::class)->execute($filter)->paginate($this->perPage),
+            'spreadsheet' => app(GetPurchaseNotasForSpreadsheet::class)->execute($filter, onlyFinal: true)->paginate($this->perPage),
+            default => app(GetPurchaseList::class)->execute($filter)->paginate($this->perPage),
+        };
 
         return view('livewire.guest.purchase-browser', [
             'rows' => $rows,

@@ -3,7 +3,9 @@
     <x-header title="{{ __('Manajemen Supplier') }}" subtitle="{{ __('Daftar supplier') }}" separator
         progress-indicator>
         <x-slot:actions>
-            <x-button label="{{ __('Tambah Supplier') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            <span data-tour="supplier-add">
+                <x-button label="{{ __('Tambah Supplier') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            </span>
         </x-slot:actions>
     </x-header>
 
@@ -32,7 +34,7 @@
     </div>
 
     {{-- CARD TABEL --}}
-    <x-card class="bg-base-100 shadow-sm">
+    <x-card class="bg-base-100 shadow-sm" data-tour="supplier-table">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -71,7 +73,7 @@
                             </td>
                             <td class="text-right">
                                 <x-button icon="{{ $supplier->is_active ? 'o-eye-slash' : 'o-eye' }}"
-                                    wire:click="toggleActive({{ $supplier->id }})"
+                                    wire:click="confirmToggleActive({{ $supplier->id }})"
                                     class="btn-sm btn-ghost text-amber-500"
                                     tooltip="{{ $supplier->is_active ? __('Nonaktifkan') : __('Aktifkan') }}" />
                                 <x-button icon="o-pencil-square" wire:click="edit({{ $supplier->id }})"
@@ -95,7 +97,7 @@
 
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingId ? __('Edit Supplier') : __('Tambah Supplier')" separator>
-        <x-form wire:submit="save">
+        <x-form wire:submit="confirmSave">
             <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-building-storefront" />
             <x-input label="{{ __('PIC') }}" wire:model="pic" icon="o-user" />
             <x-input label="{{ __('Telepon') }}" wire:model="telepon" icon="o-phone" />
@@ -114,4 +116,8 @@
     <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Hapus Supplier?') }}"
         text="{{ __('Apakah Anda yakin ingin menghapus supplier ini?') }}" confirm-text="{{ __('Ya, Hapus') }}"
         method="delete" />
+
+    {{-- MODAL KONFIRMASI GENERIK --}}
+    <x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+        :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
 </div>

@@ -10,6 +10,7 @@ use App\Livewire\Admin\Import\Wizard as ImportWizard;
 use App\Livewire\Admin\Item\Index as ItemIndex;
 use App\Livewire\Admin\Purchase\Form as PurchaseForm;
 use App\Livewire\Admin\Purchase\Index as PurchaseIndex;
+use App\Livewire\Admin\Purchase\Spreadsheet as PurchaseSpreadsheet;
 use App\Livewire\Admin\Supplier\Index as SupplierIndex;
 use App\Livewire\Admin\Unit\Index as UnitIndex;
 use App\Livewire\Admin\User\Index as AdminUserIndex;
@@ -76,6 +77,9 @@ Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->name('ad
     Route::get('/nota', PurchaseIndex::class)->name('purchases');
     Route::get('/nota/create', PurchaseForm::class)->name('purchases.create');
     Route::get('/nota/{purchase}/edit', PurchaseForm::class)->name('purchases.edit');
+
+    // Mode Spreadsheet — editor datar per-item
+    Route::get('/spreadsheet', PurchaseSpreadsheet::class)->name('spreadsheet');
 
     // Master Data (§11.4)
     Route::get('/supplier', SupplierIndex::class)->name('suppliers');

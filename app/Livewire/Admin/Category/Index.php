@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Admin\Category;
 
+use App\Actions\Category\StoreCategory;
+use App\Concerns\WithConfirmation;
+use App\DTOs\Category\CategoryData;
 use App\Models\Category;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -14,7 +17,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, Toast, WithPagination;
+    use AuthorizesRequests, Toast, WithConfirmation, WithPagination;
 
     // --- FILTER PROPERTIES ---
     #[Url(history: true)]
@@ -107,10 +110,11 @@ class Index extends Component
             $this->success(__('Kategori berhasil diperbarui.'));
         } else {
             $this->authorize('create', Category::class);
-            Category::create([
-                'nama' => $this->nama,
-                'warna' => $this->warna,
-            ]);
+            app(StoreCategory::class)->execute(new CategoryData(
+                id: null,
+                nama: $this->nama,
+                warna: $this->warna,
+            ));
             $this->success(__('Kategori berhasil ditambahkan.'));
         }
 

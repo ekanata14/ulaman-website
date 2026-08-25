@@ -1,3 +1,4 @@
+<div>
 <x-card class="bg-base-100 shadow-sm mb-6">
     <x-slot:title><span class="font-bold text-lg">{{ __('Nota Photos') }}</span></x-slot:title>
 
@@ -27,8 +28,7 @@
                     <img src="{{ $photo['thumb'] }}" alt="{{ $photo['nama'] }}"
                         class="w-full h-28 object-cover rounded-lg border border-base-300 cursor-pointer"
                         @click="$dispatch('open-photo-lightbox', { images: urls, index: {{ $idx }} })" />
-                    <x-button icon="o-trash" wire:click="deletePhoto({{ $photo['id'] }})"
-                        wire:confirm="{{ __('Delete this photo?') }}"
+                    <x-button icon="o-trash" wire:click="confirmDeletePhoto({{ $photo['id'] }})"
                         class="btn-xs btn-circle btn-error absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition" />
                 </div>
             @endforeach
@@ -37,3 +37,7 @@
         <div class="text-sm text-gray-400 mt-4">{{ __('No photos yet.') }}</div>
     @endif
 </x-card>
+
+<x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+    :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
+</div>

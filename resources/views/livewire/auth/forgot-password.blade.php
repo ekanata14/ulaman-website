@@ -52,24 +52,24 @@
 
     {{-- LEFT SIDE: VISUAL & VALUE PROPOSITION (7 Cols) --}}
     <div
-        class="hidden lg:flex lg:col-span-7 relative bg-slate-900 text-white flex-col justify-between overflow-hidden p-12 lg:p-16">
+        class="hidden lg:flex lg:col-span-7 relative bg-[#2A251D] text-white flex-col justify-between overflow-hidden p-12 lg:p-16">
         <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
             alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
 
-        <div class="absolute inset-0 bg-gradient-to-tr from-[#5b2c9d]/90 via-[#2d1b4e]/80 to-[#e65c00]/40"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#A8894C]/90 via-[#5C4A2E]/80 to-[#8C7132]/40"></div>
 
         <div class="relative z-10 flex items-center gap-3">
             <x-app-logo-icon class="w-10 h-10 object-contain drop-shadow-lg" />
-            <span class="font-bold text-2xl tracking-tight">{{ env('APP_NAME') }}</span>
+            <span class="font-bold text-2xl tracking-tight">{{ config('app.name') }}</span>
         </div>
 
         <div class="relative z-10 space-y-8 max-w-3xl">
             <div
-                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold tracking-wide text-orange-200 animate-[fade-in-up_0.8s_ease-out_both]">
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold tracking-wide text-amber-200 animate-[fade-in-up_0.8s_ease-out_both]">
                 <span class="relative flex h-2 w-2">
                     <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
                 Secure Account Recovery
             </div>
@@ -79,7 +79,7 @@
                     Get back to your
                 </span>
                 <span
-                    class="block text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 animate-[text-gradient_3s_ease_infinite] bg-[size:200%_auto] mt-2 animate-[slide-in-left_0.8s_cubic-bezier(0.16,1,0.3,1)_0.4s_both]">
+                    class="block text-transparent bg-clip-text bg-gradient-to-r from-[#C6A75C] via-[#A8894C] to-[#8C7132] animate-[text-gradient_3s_ease_infinite] bg-[size:200%_auto] mt-2 animate-[slide-in-left_0.8s_cubic-bezier(0.16,1,0.3,1)_0.4s_both]">
                     Workspace
                 </span>
             </h1>
@@ -90,7 +90,7 @@
         </div>
 
         <div class="relative z-10 text-xs text-slate-500 font-mono animate-[fade-in_1s_ease-out_1s_both]">
-            © {{ date('Y') }} {{ env('APP_NAME') }}. Engineered for productivity.
+            © {{ date('Y') }} {{ config('app.name') }}. Engineered for productivity.
         </div>
     </div>
 
@@ -99,7 +99,7 @@
         <div class="w-full max-w-sm space-y-8">
             <div class="lg:hidden flex items-center gap-2 mb-8">
                 <x-app-logo-icon class="w-10 h-10 object-contain" />
-                <span class="font-bold text-xl">{{ env('APP_NAME') }}</span>
+                <span class="font-bold text-xl">{{ config('app.name') }}</span>
             </div>
 
             <div class="space-y-2">
@@ -111,17 +111,17 @@
                 <div class="space-y-1">
                     <x-input label="Email Terdaftar" wire:model="email" icon="o-envelope"
                         placeholder="email@example.com"
-                        class="rounded-xl border-slate-200 focus:border-[#5b2c9d] focus:ring-[#5b2c9d]" />
+                        class="rounded-xl border-slate-200 focus:border-[#A8894C] focus:ring-[#A8894C]" />
                 </div>
 
                 <div class="pt-2">
                     <x-button label="Kirim Link Reset" type="submit"
-                        class="w-full rounded-xl font-bold shadow-lg shadow-purple-500/20 normal-case text-base bg-gradient-to-r from-[#5b2c9d] to-[#e65c00] border-none hover:opacity-90 text-white"
+                        class="w-full rounded-xl font-bold shadow-lg shadow-amber-900/20 normal-case text-base bg-gradient-to-r from-[#A8894C] to-[#8C7132] border-none hover:opacity-90 text-white"
                         icon-right="o-paper-airplane" spinner="sendLink" />
 
                     <div class="pt-6 text-center">
                         <a href="{{ route('login') }}"
-                            class="text-sm font-bold text-[#5b2c9d] hover:text-[#4a2380] flex items-center justify-center gap-2 transition"
+                            class="text-sm font-bold text-[#A8894C] hover:text-[#8C7132] flex items-center justify-center gap-2 transition"
                             wire:navigate>
                             <x-icon name="o-arrow-left" class="w-4 h-4" /> Kembali ke Login
                         </a>

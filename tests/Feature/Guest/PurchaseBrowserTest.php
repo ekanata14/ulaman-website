@@ -78,6 +78,44 @@ it('AC-06.4 — komponen guest tidak punya method mutasi (tidak ada sama sekali)
     expect(fn () => Livewire::test(PurchaseBrowser::class)->call('save'))->toThrow(Exception::class);
 });
 
+it('modal filter tertutup secara default dan bisa dibuka (state presentasi)', function () {
+    nota('Murda Jaya', '100000', '2026-08-10');
+
+    Livewire::test(PurchaseBrowser::class)
+        ->assertSet('showFilters', false)
+        ->set('showFilters', true)
+        ->assertSet('showFilters', true);
+});
+
+it('menghitung jumlah filter aktif untuk badge tombol Filter', function () {
+    $n = nota('Murda Jaya', '100000', '2026-08-10');
+
+    $component = Livewire::test(PurchaseBrowser::class)
+        ->set('search', 'Murda')
+        ->set('supplierIds', [$n->supplier_id]);
+
+    expect($component->instance()->activeFilterCount())->toBe(2);
+});
+
+it('event guest-filter-supplier menerapkan filter supplier & mode nota', function () {
+    $n = nota('Murda Jaya', '100000', '2026-08-10');
+
+    Livewire::test(PurchaseBrowser::class)
+        ->set('viewMode', 'item')
+        ->dispatch('guest-filter-supplier', id: $n->supplier_id)
+        ->assertSet('supplierIds', [$n->supplier_id])
+        ->assertSet('viewMode', 'nota');
+});
+
+it('event guest-search-items mengisi pencarian & beralih ke mode item', function () {
+    nota('Murda Jaya', '100000', '2026-08-10');
+
+    Livewire::test(PurchaseBrowser::class)
+        ->dispatch('guest-search-items', term: 'Semen')
+        ->assertSet('search', 'Semen')
+        ->assertSet('viewMode', 'item');
+});
+
 it('nota draft tidak pernah tampil ke guest', function () {
     $final = nota('Murda Jaya', '100000', '2026-08-10');
     $draft = nota('Draft Co', '1000', '2026-08-10', PurchaseStatus::DRAFT);

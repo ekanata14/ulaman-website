@@ -3,7 +3,9 @@
     <x-header title="{{ __('Manajemen Satuan') }}" subtitle="{{ __('Daftar satuan barang') }}" separator
         progress-indicator>
         <x-slot:actions>
-            <x-button label="{{ __('Tambah Satuan') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            <span data-tour="unit-add">
+                <x-button label="{{ __('Tambah Satuan') }}" icon="o-plus" class="btn-primary" wire:click="create" />
+            </span>
         </x-slot:actions>
     </x-header>
 
@@ -26,7 +28,7 @@
     </div>
 
     {{-- CARD TABEL --}}
-    <x-card class="bg-base-100 shadow-sm">
+    <x-card class="bg-base-100 shadow-sm" data-tour="unit-table">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -71,7 +73,7 @@
 
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingId ? __('Edit Satuan') : __('Tambah Satuan')" separator>
-        <x-form wire:submit="save">
+        <x-form wire:submit="confirmSave">
             <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-scale" />
             <x-input label="{{ __('Simbol') }}" wire:model="simbol" icon="o-hashtag" />
 
@@ -86,4 +88,8 @@
     <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Hapus Satuan?') }}"
         text="{{ __('Apakah Anda yakin ingin menghapus satuan ini?') }}" confirm-text="{{ __('Ya, Hapus') }}"
         method="delete" />
+
+    {{-- MODAL KONFIRMASI GENERIK --}}
+    <x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+        :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
 </div>

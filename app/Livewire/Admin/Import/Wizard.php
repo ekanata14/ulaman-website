@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Admin\Import;
 
+use App\Actions\Export\BuildImportTemplate;
 use App\Actions\Import\ImportPurchaseExcel;
 use App\Actions\Import\PreviewPurchaseImport;
+use App\Concerns\WithConfirmation;
 use App\DTOs\Import\ImportPreviewData;
 use App\Models\Purchase;
 use Illuminate\Contracts\View\View;
@@ -14,6 +16,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * §11.4 / §F-09 — Wizard impor 3 langkah: Upload → Preview & Peringatan →
@@ -23,7 +26,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Wizard extends Component
 {
-    use AuthorizesRequests, Toast, WithFileUploads;
+    use AuthorizesRequests, Toast, WithConfirmation, WithFileUploads;
 
     public int $step = 1;
 
@@ -40,6 +43,13 @@ class Wizard extends Component
         $this->authorize('create', Purchase::class);
     }
 
+    public function downloadTemplate(BuildImportTemplate $action): BinaryFileResponse
+    {
+        $this->authorize('create', Purchase::class);
+
+        return $action->execute();
+    }
+
     public function toPreview(): void
     {
         $this->authorize('create', Purchase::class);
@@ -50,6 +60,19 @@ class Wizard extends Component
         $this->storedPath = $this->file->store('imports', config('filesystems.default'));
         $this->preview = app(PreviewPurchaseImport::class)->execute($this->absolutePath());
         $this->step = 2;
+    }
+
+    public function confirmExecute(): void
+    {
+        $this->askConfirm(
+            'execute',
+            [],
+            __('Import all notes into the database?'),
+            __('All parsed notes will be created. This runs a queued import job.'),
+            false,
+            'o-arrow-down-tray',
+            __('Yes, Import'),
+        );
     }
 
     public function execute(): void

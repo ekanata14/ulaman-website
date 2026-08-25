@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Item;
 
 use App\Actions\Item\StoreItem;
 use App\Actions\Item\UpdateItem;
+use App\Concerns\WithConfirmation;
 use App\DTOs\Item\ItemData;
 use App\Models\Category;
 use App\Models\Item;
@@ -19,7 +20,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, Toast, WithPagination;
+    use AuthorizesRequests, Toast, WithConfirmation, WithPagination;
 
     // --- FILTER PROPERTIES ---
     #[Url(history: true)]

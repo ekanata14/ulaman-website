@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\User;
 use App\Actions\User\CreateUserAction;
 use App\Actions\User\DeleteUserAction;
 use App\Actions\User\UpdateUserAction;
+use App\Concerns\WithConfirmation;
 use App\DTOs\User\UserData;
 use App\Models\User;
 use Livewire\Attributes\Url;
@@ -15,7 +16,7 @@ use Mary\Traits\Toast;
 
 class Index extends Component
 {
-    use Toast, WithFileUploads, WithPagination;
+    use Toast, WithConfirmation, WithFileUploads, WithPagination;
 
     // --- FILTER PROPERTIES (Tersimpan di URL) ---
     #[Url(history: true)]

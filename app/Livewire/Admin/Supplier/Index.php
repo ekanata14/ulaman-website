@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Supplier;
 use App\Actions\Supplier\DetectSimilarSupplier;
 use App\Actions\Supplier\StoreSupplier;
 use App\Actions\Supplier\UpdateSupplier;
+use App\Concerns\WithConfirmation;
 use App\DTOs\Supplier\SupplierData;
 use App\Models\Supplier;
 use Illuminate\Contracts\View\View;
@@ -18,7 +19,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, Toast, WithPagination;
+    use AuthorizesRequests, Toast, WithConfirmation, WithPagination;
 
     // --- FILTER PROPERTIES ---
     #[Url(history: true)]
@@ -167,8 +168,24 @@ class Index extends Component
         $this->modalOpen = false;
     }
 
-    public function toggleActive(Supplier $supplier): void
+    public function confirmToggleActive(int $id): void
     {
+        $supplier = Supplier::findOrFail($id);
+
+        $this->askConfirm(
+            'toggleActive',
+            [$id],
+            $supplier->is_active ? __('Deactivate this supplier?') : __('Activate this supplier?'),
+            '',
+            $supplier->is_active,
+            $supplier->is_active ? 'o-eye-slash' : 'o-eye',
+            $supplier->is_active ? __('Yes, Deactivate') : __('Yes, Activate'),
+        );
+    }
+
+    public function toggleActive(int $id): void
+    {
+        $supplier = Supplier::findOrFail($id);
         $this->authorize('update', $supplier);
 
         $data = new SupplierData(

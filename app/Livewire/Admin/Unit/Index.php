@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Admin\Unit;
 
+use App\Actions\Unit\StoreUnit;
+use App\Concerns\WithConfirmation;
+use App\DTOs\Unit\UnitData;
 use App\Models\Unit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -14,7 +17,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, Toast, WithPagination;
+    use AuthorizesRequests, Toast, WithConfirmation, WithPagination;
 
     // --- FILTER PROPERTIES ---
     #[Url(history: true)]
@@ -107,10 +110,11 @@ class Index extends Component
             $this->success(__('Satuan berhasil diperbarui.'));
         } else {
             $this->authorize('create', Unit::class);
-            Unit::create([
-                'nama' => $this->nama,
-                'simbol' => $this->simbol,
-            ]);
+            app(StoreUnit::class)->execute(new UnitData(
+                id: null,
+                nama: $this->nama,
+                simbol: $this->simbol,
+            ));
             $this->success(__('Satuan berhasil ditambahkan.'));
         }
 

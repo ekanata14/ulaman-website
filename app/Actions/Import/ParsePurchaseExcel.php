@@ -15,7 +15,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class ParsePurchaseExcel
 {
     /** Ke-12 sheet bulanan yang diimpor (urutan kronologis). */
-    private const MONTHLY_SHEETS = [
+    public const MONTHLY_SHEETS = [
         'September 2025', 'Oktober 2025', 'November 2025', 'Desember 2025',
         'Januari 2026', 'Februari 2026', 'Maret 2026', 'April 2026',
         'May 2026', 'June 2026', 'July 2026', 'August 2026',
@@ -33,6 +33,14 @@ class ParsePurchaseExcel
     private const COL_PRICE = 6;
 
     private const COL_TOTAL = 7;
+
+    private const COL_DISKON_ITEM_TIPE = 8;
+
+    private const COL_DISKON_ITEM_NILAI = 9;
+
+    private const COL_DISKON_NOTA_TIPE = 10;
+
+    private const COL_DISKON_NOTA_NILAI = 11;
 
     public function __construct(
         private readonly NormalizeSupplierName $normalizeSupplier,
@@ -174,6 +182,12 @@ class ParsePurchaseExcel
                     'nomorNota' => null,
                     'needsReview' => false,
                     'isBundle' => false,
+                    'diskonNotaTipe' => $this->normalizeDiscountType(
+                        $this->cellString($sheet, self::COL_DISKON_NOTA_TIPE, $r),
+                    ),
+                    'diskonNotaNilai' => $this->parseDiscountValue(
+                        $this->cellNumeric($sheet, self::COL_DISKON_NOTA_NILAI, $r),
+                    ),
                     'items' => [],
                 ];
                 $currentIndex = count($notas) - 1;
@@ -186,6 +200,12 @@ class ParsePurchaseExcel
                 'deskripsi' => $deskripsi,
                 'qty' => $storeQty,
                 'hargaSatuan' => $hargaSatuan,
+                'diskonTipe' => $this->normalizeDiscountType(
+                    $this->cellString($sheet, self::COL_DISKON_ITEM_TIPE, $r),
+                ),
+                'diskonNilai' => $this->parseDiscountValue(
+                    $this->cellNumeric($sheet, self::COL_DISKON_ITEM_NILAI, $r),
+                ),
             ];
 
             // §F-09.7 — mismatch qty*price vs total.
@@ -289,6 +309,29 @@ class ParsePurchaseExcel
         }
 
         return $qty;
+    }
+
+    /**
+     * §F-09 — Normalisasi teks tipe diskon Excel → nilai enum DiscountType.
+     * Nilai kosong/tak dikenal dianggap 'NONE' (impor tetap aman).
+     */
+    private function normalizeDiscountType(?string $raw): string
+    {
+        return match (strtoupper(trim((string) $raw))) {
+            'PERSEN', 'PERCENT', '%' => 'PERSEN',
+            'NOMINAL', 'RP', 'RUPIAH' => 'NOMINAL',
+            default => 'NONE',
+        };
+    }
+
+    /** Nilai diskon sebagai string bcmath; kosong → '0'. */
+    private function parseDiscountValue(?string $value): string
+    {
+        if ($value === null || trim($value) === '') {
+            return '0';
+        }
+
+        return $value;
     }
 
     private function findHeaderRow(Worksheet $sheet): ?int

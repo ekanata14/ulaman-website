@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "ekanata/gretiva",
+    "name": "ekanata/ulaman",
     "type": "project",
     "description": "Laravel 12 Hybrid Action-Oriented starter template with Livewire 4, Mary UI, role-based access, and a hybrid i18n system.",
     "keywords": [

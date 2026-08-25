@@ -4,7 +4,7 @@
         progress-indicator />
 
     {{-- INLINE FILTER BAR --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 items-end">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 items-end" data-tour="audit-filter">
         <x-input placeholder="{{ __('Search action or entity') }}..." wire:model.live.debounce="search"
             icon="o-magnifying-glass" />
 
@@ -25,7 +25,7 @@
     </div>
 
     {{-- CARD TABLE --}}
-    <x-card class="bg-base-100 shadow-sm">
+    <x-card class="bg-base-100 shadow-sm" data-tour="audit-table">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>

@@ -7,8 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title . ' - ' . config('app.name') : config('app.name') }}</title>
 
-    <link rel="icon" href="{{ asset('assets/images/logo_gretiva.png') }}" type="image/x-icon">
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -36,45 +34,14 @@
 
             {{-- BRAND --}}
             <div class="px-6 pb-3 pt-6 flex items-center gap-3">
-                <img src="{{ asset('assets/images/logo_gretiva.png') }}" alt="Logo" class="w-10 h-10 object-contain"
-                    onerror="this.style.display='none';">
+                <x-icon name="o-building-storefront" class="w-9 h-9 text-primary" />
                 <div class="leading-tight">
-                    <h2 class="font-bold text-lg">{{ env('APP_NAME', 'Gretiva') }}</h2>
+                    <h2 class="font-bold text-lg">{{ config('app.name') }}</h2>
                 </div>
             </div>
 
             {{-- MENU --}}
-            @php($role = auth()->user()->role)
-            <x-menu activate-by-route active-bg-color="bg-primary text-primary-content rounded" class="gap-1 px-3 mt-4">
-                {{-- Admin & Super Admin: area operasional UPL --}}
-                @if (in_array($role, ['super_admin', 'admin'], true))
-                    <x-menu-item title="{{ __('Dashboard') }}" icon="o-home" link="{{ route('admin.dashboard') }}" />
-                    <x-menu-item title="{{ __('Purchase Notes') }}" icon="o-document-text"
-                        link="{{ route('admin.purchases') }}" />
-
-                    <x-menu-separator title="{{ __('Master Data') }}" />
-                    <x-menu-item title="{{ __('Suppliers') }}" icon="o-building-storefront"
-                        link="{{ route('admin.suppliers') }}" />
-                    <x-menu-item title="{{ __('Items') }}" icon="o-cube" link="{{ route('admin.items') }}" />
-                    <x-menu-item title="{{ __('Units') }}" icon="o-scale" link="{{ route('admin.units') }}" />
-                    <x-menu-item title="{{ __('Categories') }}" icon="o-tag" link="{{ route('admin.categories') }}" />
-
-                    <x-menu-separator title="{{ __('Tools') }}" />
-                    <x-menu-item title="{{ __('Import Excel') }}" icon="o-arrow-up-tray"
-                        link="{{ route('admin.import') }}" />
-                    <x-menu-item title="{{ __('Audit Log') }}" icon="o-clipboard-document-list"
-                        link="{{ route('admin.audit-logs') }}" />
-                @endif
-
-                {{-- Khusus Super Admin --}}
-                @if ($role === 'super_admin')
-                    <x-menu-separator title="{{ __('Administration') }}" />
-                    <x-menu-item title="{{ __('Users') }}" icon="o-users" link="{{ route('admin.users') }}" />
-                @endif
-
-                <hr class="my-3 border-base-300">
-                <x-menu-item title="{{ __('Settings') }}" icon="o-cog-6-tooth" link="{{ route('settings') }}" />
-            </x-menu>
+            @include('partials.admin-menu')
         </x-slot:sidebar>
 
         {{-- CONTENT SLOT --}}
@@ -122,6 +89,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
+                    <livewire:admin-tour />
                     <livewire:language-switcher />
                     <x-theme-toggle class="btn btn-circle btn-ghost btn-sm" />
                     <livewire:navbar-notifications />
@@ -181,6 +149,8 @@
     </x-main>
 
     <x-toast />
+
+    @include('partials.admin-tour')
 
 </body>
 

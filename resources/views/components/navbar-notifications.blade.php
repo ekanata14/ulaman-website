@@ -151,7 +151,6 @@
                         if ('Notification' in window && Notification.permission === 'granted') {
                             const nav = new Notification(notification.title || 'Pemberitahuan Baru', {
                                 body: notification.message || 'Anda mendapatkan pembaruan tugas.',
-                                icon: '/assets/images/logo_gretiva.png',
                             });
                             nav.onclick = function(event) {
                                 event.preventDefault();

@@ -3,18 +3,22 @@
     <x-header title="{{ __('Purchase Notes') }}" subtitle="{{ __('Recorded purchase notes') }}" separator
         progress-indicator>
         <x-slot:actions>
-            <x-dropdown label="{{ __('Export') }}" icon="o-arrow-down-tray" class="btn-ghost">
-                <x-menu-item title="Excel (.xlsx)" icon="o-table-cells" wire:click="exportExcel" />
-                <x-menu-item title="CSV" icon="o-document-text" wire:click="exportCsv" />
-                <x-menu-item title="PDF" icon="o-document" wire:click="exportPdf" />
-            </x-dropdown>
-            <x-button label="{{ __('Add Note') }}" icon="o-plus" class="btn-primary"
-                link="{{ route('admin.purchases.create') }}" />
+            <span data-tour="purchase-export">
+                <x-dropdown label="{{ __('Export') }}" icon="o-arrow-down-tray" class="btn-ghost">
+                    <x-menu-item title="Excel (.xlsx)" icon="o-table-cells" wire:click="exportExcel" />
+                    <x-menu-item title="CSV" icon="o-document-text" wire:click="exportCsv" />
+                    <x-menu-item title="PDF" icon="o-document" wire:click="exportPdf" />
+                </x-dropdown>
+            </span>
+            <span data-tour="purchase-add">
+                <x-button label="{{ __('Add Note') }}" icon="o-plus" class="btn-primary"
+                    link="{{ route('admin.purchases.create') }}" />
+            </span>
         </x-slot:actions>
     </x-header>
 
     {{-- FILTER BAR --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end" data-tour="purchase-filter">
         <x-input placeholder="{{ __('Code / note no.') }}..." wire:model.live.debounce="search"
             icon="o-magnifying-glass" />
         <x-input type="date" label="{{ __('From') }}" wire:model.live="dari" />
@@ -28,7 +32,7 @@
     </div>
 
     {{-- TABLE --}}
-    <x-card class="bg-base-100 shadow-sm">
+    <x-card class="bg-base-100 shadow-sm" data-tour="purchase-table">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -59,9 +63,8 @@
                             <td class="text-right whitespace-nowrap">
                                 <x-button icon="o-pencil-square" link="{{ route('admin.purchases.edit', $purchase->id) }}"
                                     class="btn-sm btn-ghost text-blue-500" tooltip="{{ __('Edit') }}" />
-                                <x-button icon="o-document-duplicate" wire:click="duplicate({{ $purchase->id }})"
-                                    class="btn-sm btn-ghost text-gray-500" tooltip="{{ __('Duplicate') }}"
-                                    spinner="duplicate({{ $purchase->id }})" />
+                                <x-button icon="o-document-duplicate" wire:click="confirmDuplicate({{ $purchase->id }})"
+                                    class="btn-sm btn-ghost text-gray-500" tooltip="{{ __('Duplicate') }}" />
                                 <x-button icon="o-trash" wire:click="confirmDelete({{ $purchase->id }})"
                                     class="btn-sm btn-ghost text-red-500" tooltip="{{ __('Delete') }}" />
                             </td>
@@ -83,4 +86,8 @@
     <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Delete Purchase Note?') }}"
         text="{{ __('This will remove the note and all its items. This action cannot be undone.') }}"
         confirm-text="{{ __('Yes, Delete') }}" method="delete" />
+
+    {{-- MODAL KONFIRMASI GENERIK --}}
+    <x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+        :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
 </div>

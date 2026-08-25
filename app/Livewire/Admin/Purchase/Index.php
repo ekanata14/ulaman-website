@@ -7,6 +7,7 @@ use App\Actions\Export\ExportPurchasesToExcel;
 use App\Actions\Export\GeneratePurchasePdf;
 use App\Actions\Purchase\DeletePurchase;
 use App\Actions\Purchase\DuplicatePurchase;
+use App\Concerns\WithConfirmation;
 use App\DTOs\Purchase\PurchaseFilterData;
 use App\Enums\PurchaseStatus;
 use App\Models\Purchase;
@@ -24,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    use AuthorizesRequests, Toast, WithPagination;
+    use AuthorizesRequests, Toast, WithConfirmation, WithPagination;
 
     #[Url(history: true)]
     public string $search = '';
@@ -61,6 +62,19 @@ class Index extends Component
     {
         $this->reset(['search', 'dari', 'sampai', 'supplierId', 'status']);
         $this->resetPage();
+    }
+
+    public function confirmDuplicate(int $id): void
+    {
+        $this->askConfirm(
+            'duplicate',
+            [$id],
+            __('Duplicate this purchase note?'),
+            __('A copy will be created that you can edit.'),
+            false,
+            'o-document-duplicate',
+            __('Yes, Duplicate'),
+        );
     }
 
     public function duplicate(int $id): void

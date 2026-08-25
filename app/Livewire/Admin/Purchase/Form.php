@@ -3,10 +3,19 @@
 namespace App\Livewire\Admin\Purchase;
 
 use App\Actions\Calculation\CalculatePurchaseTotals;
+use App\Actions\Category\StoreCategory;
+use App\Actions\Item\StoreItem;
 use App\Actions\Purchase\DeletePurchase;
 use App\Actions\Purchase\StorePurchase;
 use App\Actions\Purchase\UpdatePurchase;
+use App\Actions\Supplier\StoreSupplier;
+use App\Actions\Unit\StoreUnit;
+use App\Concerns\WithConfirmation;
+use App\DTOs\Category\CategoryData;
+use App\DTOs\Item\ItemData;
 use App\DTOs\Purchase\CalculatedPurchaseData;
+use App\DTOs\Supplier\SupplierData;
+use App\DTOs\Unit\UnitData;
 use App\Enums\BundleType;
 use App\Livewire\Forms\PurchaseForm;
 use App\Models\Category;
@@ -31,7 +40,7 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Form extends Component
 {
-    use AuthorizesRequests, Toast;
+    use AuthorizesRequests, Toast, WithConfirmation;
 
     public PurchaseForm $form;
 
@@ -47,6 +56,42 @@ class Form extends Component
     public string $bundleTipe = 'PERSEN';
 
     public string $bundleNilai = '0';
+
+    // --- QUICK-ADD: Supplier ---
+    public bool $supplierModalOpen = false;
+
+    public string $qsNama = '';
+
+    public ?string $qsPic = null;
+
+    public ?string $qsTelepon = null;
+
+    // --- QUICK-ADD: Kategori ---
+    public bool $categoryModalOpen = false;
+
+    public string $qcNama = '';
+
+    public ?string $qcWarna = null;
+
+    // --- QUICK-ADD: Satuan (per baris) ---
+    public bool $unitModalOpen = false;
+
+    public ?int $unitTargetIndex = null;
+
+    public string $quNama = '';
+
+    public ?string $quSimbol = null;
+
+    // --- QUICK-ADD: Master Item (per baris) ---
+    public bool $itemModalOpen = false;
+
+    public ?int $itemTargetIndex = null;
+
+    public string $qiNama = '';
+
+    public ?int $qiUnitId = null;
+
+    public ?int $qiCategoryId = null;
 
     public function mount(?Purchase $purchase = null): void
     {
@@ -80,6 +125,19 @@ class Form extends Component
         ];
     }
 
+    public function confirmRemoveItem(string $uid): void
+    {
+        $this->askConfirm(
+            'removeItem',
+            [$uid],
+            __('Remove this item from the note?'),
+            '',
+            true,
+            'o-trash',
+            __('Yes, Remove'),
+        );
+    }
+
     public function removeItem(string $uid): void
     {
         $this->form->items = array_values(
@@ -87,6 +145,20 @@ class Form extends Component
         );
         $this->selectedForBundle = array_values(array_diff($this->selectedForBundle, [$uid]));
         $this->dissolveBundlesMissing($uid);
+        $this->info(__('Item removed.'));
+    }
+
+    public function confirmCreateBundle(): void
+    {
+        $this->askConfirm(
+            'createBundle',
+            [],
+            __('Create this bundle?'),
+            '',
+            false,
+            'o-cube',
+            __('Yes, Create'),
+        );
     }
 
     public function createBundle(): void
@@ -125,11 +197,25 @@ class Form extends Component
         $this->success(__('Bundle created.'));
     }
 
+    public function confirmRemoveBundle(string $uid): void
+    {
+        $this->askConfirm(
+            'removeBundle',
+            [$uid],
+            __('Dissolve this bundle?'),
+            '',
+            true,
+            'o-trash',
+            __('Yes, Dissolve'),
+        );
+    }
+
     public function removeBundle(string $uid): void
     {
         $this->form->bundles = array_values(
             array_filter($this->form->bundles, static fn (array $b): bool => $b['uid'] !== $uid),
         );
+        $this->info(__('Bundle dissolved.'));
     }
 
     /**
@@ -176,8 +262,16 @@ class Form extends Component
             return;
         }
 
-        $item = Item::find((int) $itemId);
-        if ($item === null) {
+        $this->applyMasterItem($idx, (int) $itemId);
+    }
+
+    /**
+     * Auto-isi deskripsi/satuan/harga terakhir dari item master ke baris ke-$idx.
+     */
+    private function applyMasterItem(int $idx, int $itemId): void
+    {
+        $item = Item::find($itemId);
+        if ($item === null || ! isset($this->form->items[$idx])) {
             return;
         }
 
@@ -186,6 +280,150 @@ class Form extends Component
         if (($this->form->items[$idx]['hargaSatuan'] ?? '') === '' && $item->harga_terakhir !== null) {
             $this->form->items[$idx]['hargaSatuan'] = (string) $item->harga_terakhir;
         }
+    }
+
+    // ==================== QUICK-ADD MASTER DATA ====================
+
+    public function openSupplierModal(): void
+    {
+        $this->authorize('create', Supplier::class);
+        $this->reset('qsNama', 'qsPic', 'qsTelepon');
+        $this->supplierModalOpen = true;
+    }
+
+    public function confirmSaveSupplier(): void
+    {
+        $this->validate([
+            'qsNama' => ['required', 'string', 'max:255', 'unique:suppliers,nama'],
+            'qsPic' => ['nullable', 'string', 'max:255'],
+            'qsTelepon' => ['nullable', 'string', 'max:255'],
+        ]);
+        $this->askConfirm('saveSupplier', [], __('Save this supplier?'), '', false, 'o-check-circle', __('Yes, Save'));
+    }
+
+    public function saveSupplier(): void
+    {
+        $this->authorize('create', Supplier::class);
+        $supplier = app(StoreSupplier::class)->execute(new SupplierData(
+            id: null,
+            nama: $this->qsNama,
+            telepon: $this->qsTelepon,
+            pic: $this->qsPic,
+        ));
+
+        $this->form->supplierId = $supplier->id;
+        $this->supplierModalOpen = false;
+        $this->reset('qsNama', 'qsPic', 'qsTelepon');
+        $this->success(__('Supplier added.'));
+    }
+
+    public function openCategoryModal(): void
+    {
+        $this->authorize('create', Category::class);
+        $this->reset('qcNama', 'qcWarna');
+        $this->categoryModalOpen = true;
+    }
+
+    public function confirmSaveCategory(): void
+    {
+        $this->validate([
+            'qcNama' => ['required', 'string', 'max:255'],
+            'qcWarna' => ['nullable', 'string', 'max:50'],
+        ]);
+        $this->askConfirm('saveCategory', [], __('Save this category?'), '', false, 'o-check-circle', __('Yes, Save'));
+    }
+
+    public function saveCategory(): void
+    {
+        $this->authorize('create', Category::class);
+        $category = app(StoreCategory::class)->execute(new CategoryData(
+            id: null,
+            nama: $this->qcNama,
+            warna: $this->qcWarna,
+        ));
+
+        $this->form->categoryId = $category->id;
+        $this->categoryModalOpen = false;
+        $this->reset('qcNama', 'qcWarna');
+        $this->success(__('Category added.'));
+    }
+
+    public function openUnitModal(int $index): void
+    {
+        $this->authorize('create', Unit::class);
+        $this->unitTargetIndex = $index;
+        $this->reset('quNama', 'quSimbol');
+        $this->unitModalOpen = true;
+    }
+
+    public function confirmSaveUnit(): void
+    {
+        $this->validate([
+            'quNama' => ['required', 'string', 'max:255'],
+            'quSimbol' => ['nullable', 'string', 'max:50'],
+        ]);
+        $this->askConfirm('saveUnit', [], __('Save this unit?'), '', false, 'o-check-circle', __('Yes, Save'));
+    }
+
+    public function saveUnit(): void
+    {
+        $this->authorize('create', Unit::class);
+        $unit = app(StoreUnit::class)->execute(new UnitData(
+            id: null,
+            nama: $this->quNama,
+            simbol: $this->quSimbol,
+        ));
+
+        if ($this->unitTargetIndex !== null && isset($this->form->items[$this->unitTargetIndex])) {
+            $this->form->items[$this->unitTargetIndex]['unitId'] = $unit->id;
+        }
+
+        $this->unitModalOpen = false;
+        $this->reset('quNama', 'quSimbol', 'unitTargetIndex');
+        $this->success(__('Unit added.'));
+    }
+
+    public function openItemModal(int $index): void
+    {
+        $this->authorize('create', Item::class);
+        $this->itemTargetIndex = $index;
+        $this->reset('qiNama', 'qiUnitId', 'qiCategoryId');
+        $this->itemModalOpen = true;
+    }
+
+    public function confirmSaveItem(): void
+    {
+        $this->validate([
+            'qiNama' => ['required', 'string', 'max:255', 'unique:items,nama'],
+            'qiUnitId' => ['nullable', 'exists:units,id'],
+            'qiCategoryId' => ['nullable', 'exists:categories,id'],
+        ]);
+        $this->askConfirm('saveItem', [], __('Save this item?'), '', false, 'o-check-circle', __('Yes, Save'));
+    }
+
+    public function saveItem(): void
+    {
+        $this->authorize('create', Item::class);
+        $item = app(StoreItem::class)->execute(new ItemData(
+            id: null,
+            nama: $this->qiNama,
+            unitId: $this->qiUnitId,
+            categoryId: $this->qiCategoryId,
+        ));
+
+        if ($this->itemTargetIndex !== null && isset($this->form->items[$this->itemTargetIndex])) {
+            $this->form->items[$this->itemTargetIndex]['itemId'] = $item->id;
+            $this->applyMasterItem($this->itemTargetIndex, $item->id);
+        }
+
+        $this->itemModalOpen = false;
+        $this->reset('qiNama', 'qiUnitId', 'qiCategoryId', 'itemTargetIndex');
+        $this->success(__('Item added.'));
+    }
+
+    protected function validateForSave(): void
+    {
+        $this->form->validate();
     }
 
     public function save(): void

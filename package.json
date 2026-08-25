@@ -12,6 +12,7 @@
         "browser-image-compression": "^2.0.2",
         "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
+        "driver.js": "^1.8.0",
         "laravel-vite-plugin": "^2.0",
         "sortablejs": "^1.15.7",
         "vite": "^7.0.4"

@@ -6,7 +6,7 @@
     <x-header title="{{ __('Import Excel') }}" subtitle="{{ __('Migrate 12 months of purchase data') }}" separator />
 
     {{-- STEPPER --}}
-    <ul class="steps w-full mb-8">
+    <ul class="steps w-full mb-8" data-tour="import-stepper">
         <li class="step {{ $step >= 1 ? 'step-primary' : '' }}">{{ __('Upload') }}</li>
         <li class="step {{ $step >= 2 ? 'step-primary' : '' }}">{{ __('Preview & Warnings') }}</li>
         <li class="step {{ $step >= 3 ? 'step-primary' : '' }}">{{ __('Execute') }}</li>
@@ -16,12 +16,18 @@
     @if ($step === 1)
         <x-card class="bg-base-100 shadow-sm">
             <x-form wire:submit="toPreview">
-                <x-file wire:model="file" label="{{ __('Excel File (.xlsx)') }}" accept=".xlsx,.xls"
-                    hint="{{ __('Max 20 MB. 12 monthly sheets; recap sheets are skipped.') }}" />
+                <div data-tour="import-file">
+                    <x-file wire:model="file" label="{{ __('Excel File (.xlsx)') }}" accept=".xlsx,.xls"
+                        hint="{{ __('Max 20 MB. 12 monthly sheets; recap sheets are skipped. Download the example template below.') }}" />
+                </div>
                 <div wire:loading wire:target="file" class="text-sm text-gray-500 mt-2">
                     <x-loading class="loading-sm" /> {{ __('Uploading...') }}
                 </div>
                 <x-slot:actions>
+                    <span data-tour="import-template">
+                        <x-button label="{{ __('Download Template') }}" icon="o-arrow-down-tray"
+                            wire:click="downloadTemplate" class="btn-outline" spinner="downloadTemplate" />
+                    </span>
                     <x-button label="{{ __('Preview') }}" type="submit" icon="o-eye" class="btn-primary"
                         spinner="toPreview" />
                 </x-slot:actions>
@@ -75,8 +81,8 @@
 
         <div class="flex justify-between">
             <x-button label="{{ __('Back') }}" icon="o-arrow-left" wire:click="$set('step', 1)" class="btn-ghost" />
-            <x-button label="{{ __('Import Now') }}" icon="o-play" wire:click="execute" class="btn-primary"
-                wire:confirm="{{ __('Import all notes into the database?') }}" spinner="execute" />
+            <x-button label="{{ __('Import Now') }}" icon="o-play" wire:click="confirmExecute" class="btn-primary"
+                spinner="confirmExecute" />
         </div>
     @endif
 
@@ -104,15 +110,16 @@
             @if ($reconciliation && isset($reconciliation['rows']))
                 <div class="mb-4 flex flex-wrap gap-3">
                     <x-stat title="{{ __('Imported Items') }}" value="{{ number_format($reconciliation['stats']['items'] ?? 0, 0, ',', '.') }}" icon="o-cube" />
-                    <x-stat title="{{ __('System Total') }}" value="{{ Money::format($reconciliation['totalSystem'] ?? '0') }}" icon="o-cpu-chip" color="text-primary" />
+                    <x-stat title="{{ __('Subtotal (Gross)') }}" value="{{ Money::format($reconciliation['totalSystem'] ?? '0') }}" icon="o-cpu-chip" color="text-primary" />
                     <x-stat title="{{ __('Excel Total') }}" value="{{ Money::format($reconciliation['totalExcel'] ?? '0') }}" icon="o-document-text" />
+                    <x-stat title="{{ __('Total after Discount') }}" value="{{ Money::format($reconciliation['netGrandTotal'] ?? '0') }}" icon="o-banknotes" color="text-success" />
                 </div>
                 <div class="overflow-x-auto">
                     <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>{{ __('Sheet') }}</th>
-                                <th class="text-right">{{ __('System') }}</th>
+                                <th class="text-right">{{ __('Subtotal (Gross)') }}</th>
                                 <th class="text-right">{{ __('Excel TOTAL') }}</th>
                                 <th class="text-right">{{ __('Delta') }}</th>
                             </tr>
@@ -142,4 +149,7 @@
             @endif
         </x-card>
     @endif
+
+    <x-modal-confirm wire:model="confirmModalOpen" :title="$confirmTitle" :text="$confirmMessage"
+        :confirm-text="$confirmButton" :icon="$confirmIcon" :danger="$confirmDanger" method="confirmProceed" />
 </div>

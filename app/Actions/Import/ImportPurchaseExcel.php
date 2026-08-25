@@ -45,8 +45,9 @@ class ImportPurchaseExcel implements ShouldQueue
 
         /** @var array<string, string> $systemBySheet */
         $systemBySheet = [];
+        $netGrandTotal = Money::zero();
 
-        DB::transaction(function () use ($notas, $totalNotas, $actor, $store, &$systemBySheet): void {
+        DB::transaction(function () use ($notas, $totalNotas, $actor, $store, &$systemBySheet, &$netGrandTotal): void {
             foreach ($notas as $i => $nota) {
                 $items = [];
                 foreach ($nota['items'] as $urutan => $item) {
@@ -58,8 +59,8 @@ class ImportPurchaseExcel implements ShouldQueue
                         qty: $item['qty'],
                         unitId: null,
                         hargaSatuan: $item['hargaSatuan'],
-                        diskonTipe: DiscountType::NONE,
-                        diskonNilai: '0',
+                        diskonTipe: DiscountType::from((string) $item['diskonTipe']),
+                        diskonNilai: (string) $item['diskonNilai'],
                         remark: null,
                         urutan: $urutan,
                     );
@@ -86,8 +87,8 @@ class ImportPurchaseExcel implements ShouldQueue
                     metodeBayar: null,
                     remark: null,
                     status: PurchaseStatus::FINAL,
-                    diskonNotaTipe: DiscountType::NONE,
-                    diskonNotaNilai: '0',
+                    diskonNotaTipe: DiscountType::from((string) $nota['diskonNotaTipe']),
+                    diskonNotaNilai: (string) $nota['diskonNotaNilai'],
                     items: $items,
                     bundles: $bundles,
                 );
@@ -98,11 +99,15 @@ class ImportPurchaseExcel implements ShouldQueue
                     $purchase->forceFill(['needs_review' => true])->save();
                 }
 
+                // Rekonsiliasi memakai subtotal (kotor, sebelum diskon) agar cocok
+                // dengan Σ kolom Total Excel walau nota memiliki diskon. Grand total
+                // (setelah diskon) diakumulasi terpisah sebagai info.
                 $sheet = $nota['sheet'];
                 $systemBySheet[$sheet] = Money::add(
                     $systemBySheet[$sheet] ?? '0',
-                    (string) $purchase->grand_total,
+                    (string) $purchase->subtotal,
                 );
+                $netGrandTotal = Money::add($netGrandTotal, (string) $purchase->grand_total);
 
                 Cache::put('import:progress', [
                     'done' => $i + 1,
@@ -128,6 +133,7 @@ class ImportPurchaseExcel implements ShouldQueue
             'totalSystem' => $reconcile['totalSystem'],
             'totalExcel' => $reconcile['totalExcel'],
             'totalDelta' => $reconcile['totalDelta'],
+            'netGrandTotal' => $netGrandTotal,
             'warnings' => $parsed['warnings'],
             'stats' => $parsed['stats'],
         ], 3600);

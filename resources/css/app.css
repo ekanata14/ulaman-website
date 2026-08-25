@@ -15,14 +15,67 @@
     The lines below were added by maryUI installer.
 */
 
-/** daisyUI */
+/** daisyUI — tema brand Ulaman (emas + krem) */
 @plugin "daisyui" {
-    themes: light --default, dark --prefersdark;
+    themes: false;
 }
 
-:root {
-    --color-primary: #136daf;
-    --primary: #136daf;
+@plugin "daisyui/theme" {
+    name: "light";
+    default: true;
+    color-scheme: light;
+
+    --color-base-100: #FBF9F4;
+    --color-base-200: #F2ECE0;
+    --color-base-300: #E4D9C6;
+    --color-base-content: #3A342A;
+
+    --color-primary: #A8894C;
+    --color-primary-content: #FFFFFF;
+    --color-secondary: #7A6A4F;
+    --color-secondary-content: #FFFFFF;
+    --color-accent: #8A8452;
+    --color-accent-content: #FFFFFF;
+    --color-neutral: #3A342A;
+    --color-neutral-content: #F2ECE0;
+
+    --color-info: #5B7C8D;
+    --color-info-content: #FFFFFF;
+    --color-success: #6F8B4F;
+    --color-success-content: #FFFFFF;
+    --color-warning: #C9A227;
+    --color-warning-content: #2B2519;
+    --color-error: #B05A43;
+    --color-error-content: #FFFFFF;
+}
+
+@plugin "daisyui/theme" {
+    name: "dark";
+    prefersdark: true;
+    color-scheme: dark;
+
+    --color-base-100: #26221B;
+    --color-base-200: #1F1B15;
+    --color-base-300: #332D24;
+    --color-base-content: #EDE6D8;
+
+    --color-primary: #C6A75C;
+    --color-primary-content: #241E14;
+    --color-secondary: #9A876A;
+    --color-secondary-content: #201B14;
+    --color-accent: #A7A06A;
+    --color-accent-content: #201B14;
+    --color-neutral: #EDE6D8;
+    --color-neutral-content: #26221B;
+
+    --color-info: #7FA6B8;
+    --color-info-content: #101418;
+    --color-success: #8CA96A;
+    --color-success-content: #10160B;
+    --color-warning: #D9B84A;
+    --color-warning-content: #201B10;
+    --color-error: #C87157;
+    --color-error-content: #1A0E0A;
 }
 
 /* maryUI */

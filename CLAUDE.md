@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Gretiva is a project-management starter template built on **Laravel 12 + Livewire 4 + Mary UI** (DaisyUI/Tailwind v4). Its two defining traits are a **hybrid action-oriented architecture** (thin Livewire components delegating to single-purpose Actions via DTOs) and a **hybrid i18n system** (static JSON UI strings + dynamic `spatie/laravel-translatable` DB columns with Google Translate auto-fill).
+Ulaman is a project-management starter template built on **Laravel 12 + Livewire 4 + Mary UI** (DaisyUI/Tailwind v4). Its two defining traits are a **hybrid action-oriented architecture** (thin Livewire components delegating to single-purpose Actions via DTOs) and a **hybrid i18n system** (static JSON UI strings + dynamic `spatie/laravel-translatable` DB columns with Google Translate auto-fill).
 
 Note: README.md says "Laravel 11" but `composer.json` pins `laravel/framework: ^12.0` and runs on PHP 8.4 — trust composer/Boost, not the README prose. Source comments are in Indonesian.
 
@@ -72,7 +72,7 @@ Mary UI components (`<x-...>`, Mary traits like `Toast`) over Tailwind v4 + Dais
 
 # Ulaman Purchase Log (UPL) — Project Extension
 
-> Section ini DITAMBAHKAN di atas template Gretiva. Konvensi Gretiva di atas tetap berlaku penuh.
+> Section ini DITAMBAHKAN di atas template Ulaman. Konvensi Ulaman di atas tetap berlaku penuh.
 
 ## Konteks Proyek
 Ulaman Purchase Log adalah sistem pencatatan pembelian barang proyek renovasi Ulaman, dibangun DI ATAS template ini. Publik (Guest, tanpa login) menelusuri nota/laporan; Admin & Super Admin mengelola nota, diskon/bundle, foto nota, master data, impor Excel, dan audit log. Sumber data awal: `docs/Ulaman Renovation.xlsx` (16 sheet, ±730 item, pola "Date & Supplier hanya diisi di baris pertama tiap nota").
