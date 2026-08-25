@@ -144,8 +144,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
-        Features::resetPasswords(),
+        // Registrasi publik & reset password dinonaktifkan (akun dibuat oleh admin).
         Features::emailVerification(),
         Features::twoFactorAuthentication([
             'confirm' => true,

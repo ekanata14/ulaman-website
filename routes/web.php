@@ -14,11 +14,7 @@ use App\Livewire\Admin\Purchase\Spreadsheet as PurchaseSpreadsheet;
 use App\Livewire\Admin\Supplier\Index as SupplierIndex;
 use App\Livewire\Admin\Unit\Index as UnitIndex;
 use App\Livewire\Admin\User\Index as AdminUserIndex;
-use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
-use App\Livewire\Auth\Register;
-// Email Verification Routes
-use App\Livewire\Auth\ResetPassword;
 // Route khusus untuk handle klik link dari email (Laravel Handle Otomatis)
 use App\Livewire\Auth\VerifyEmail;
 // Settings Route
@@ -58,16 +54,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
-    Route::get('/register', Register::class)->name('register');
-
-    // Halaman Request Link
-    Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
-
-    // Halaman Input Password Baru (Link dari Email akan mengarah kesini)
-    Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');
 });
-
-Route::get('/register', Register::class)->name('register')->middleware('guest');
 
 Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->name('admin.')->group(function () {
 

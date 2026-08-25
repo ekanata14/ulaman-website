@@ -10,7 +10,7 @@
     {{-- LEFT SIDE: VISUAL & VALUE PROPOSITION (7 Cols) --}}
     <div class="hidden lg:flex lg:col-span-7 relative bg-[#2A251D] text-white flex-col justify-between overflow-hidden p-12 lg:p-16">
         <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-             alt="Productivity Background"
+             alt="Ulaman renovation"
              class="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
         <div class="absolute inset-0 bg-gradient-to-tr from-[#A8894C]/90 via-[#5C4A2E]/80 to-[#8C7132]/40"></div>
 
@@ -25,25 +25,25 @@
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                 </span>
-                Laravel 12 Hybrid Action-Oriented Template
+                Renovation Purchase Log
             </div>
 
             <h1 class="text-5xl lg:text-7xl font-extrabold leading-none tracking-tight">
                 <span class="block animate-[slide-in-left_0.8s_cubic-bezier(0.16,1,0.3,1)_0.2s_both]">
-                    Hybrid Action-Oriented Template.
+                    Track every purchase,
                 </span>
                 <span class="block text-transparent bg-clip-text bg-gradient-to-r from-[#C6A75C] via-[#A8894C] to-[#8C7132] animate-[text-gradient_3s_ease_infinite] bg-[size:200%_auto] mt-2 animate-[slide-in-left_0.8s_cubic-bezier(0.16,1,0.3,1)_0.4s_both]">
-                    By {{ config('app.name') }}
+                    for {{ config('app.name') }} Renovation.
                 </span>
             </h1>
 
             <p class="text-lg text-slate-300 leading-relaxed max-w-xl animate-[fade-in-up_0.8s_ease-out_0.6s_both]">
-                Save your development time
+                One clear record for every renovation purchase — logged, verified, and instantly searchable.
             </p>
         </div>
 
         <div class="relative z-10 text-xs text-slate-500 font-mono animate-[fade-in_1s_ease-out_1s_both]">
-            © {{ date('Y') }} {{ config('app.name') }}. Engineered for productivity.
+            © {{ date('Y') }} {{ config('app.name') }}. Every nota, accounted for.
         </div>
     </div>
 
@@ -89,11 +89,8 @@
                     </button>
                 </div>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center">
                     <x-checkbox label="Keep me logged in" wire:model="remember" class="checkbox-primary checkbox-sm [--chkbg:#A8894C] [--chkfg:white]" />
-                    <a href="{{ route('password.request') }}" class="text-sm font-bold text-[#A8894C] hover:text-[#8C7132]" wire:navigate>
-                        Forgot password?
-                    </a>
                 </div>
 
                 <div class="pt-2">
@@ -104,14 +101,6 @@
                         icon-right="o-arrow-right"
                         spinner="login"
                     />
-                    <div class="pt-4 text-center">
-                        <p class="text-slate-600 dark:text-slate-400 text-sm">
-                            Don't have an account?
-                            <a href="{{ route('register') }}" class="font-bold text-[#A8894C] hover:text-[#8C7132] transition-colors" wire:navigate>
-                                Create one
-                            </a>
-                        </p>
-                    </div>
                 </div>
             </x-form>
         </div>

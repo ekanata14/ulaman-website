@@ -86,7 +86,7 @@
         </div>
 
         <div class="relative z-10 text-xs text-slate-500 font-mono animate-[fade-in_1s_ease-out_1s_both]">
-            © {{ date('Y') }} {{ config('app.name') }}. Engineered for productivity.
+            © {{ date('Y') }} {{ config('app.name') }}. Every nota, accounted for.
         </div>
     </div>
 
