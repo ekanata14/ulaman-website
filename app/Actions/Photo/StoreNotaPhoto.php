@@ -25,8 +25,8 @@ class StoreNotaPhoto
             throw new \RuntimeException('Tipe berkas tidak didukung (hanya JPG, PNG, WEBP).');
         }
 
-        if ($file->getSize() > 10 * 1024 * 1024) {
-            throw new \RuntimeException('Ukuran berkas melebihi 10 MB.');
+        if ($file->getSize() > 50 * 1024 * 1024) {
+            throw new \RuntimeException('Ukuran berkas melebihi 50 MB.');
         }
 
         $path = $file->store("nota-photos/{$purchase->id}", config('filesystems.default'));
@@ -36,6 +36,7 @@ class StoreNotaPhoto
         $photo = new PurchasePhoto;
         $photo->forceFill([
             'purchase_id' => $purchase->getKey(),
+            'jenis' => 'nota',
             'path' => $path,
             'nama_file_asli' => $file->getClientOriginalName(),
             'mime_type' => $mime,

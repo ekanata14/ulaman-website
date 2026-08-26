@@ -33,7 +33,7 @@ class PurchaseDetailModal extends Component
         if ($this->purchaseId !== null) {
             $purchase = Purchase::query()
                 ->final()
-                ->with(['supplier', 'category', 'items.unit', 'bundles.bundleItems.purchaseItem', 'photos'])
+                ->with(['supplier', 'items.unit', 'bundles.bundleItems.purchaseItem', 'photos'])
                 ->find($this->purchaseId);
 
             if ($purchase !== null) {

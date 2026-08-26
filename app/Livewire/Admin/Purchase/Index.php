@@ -69,7 +69,7 @@ class Index extends Component
         $this->askConfirm(
             'duplicate',
             [$id],
-            __('Duplicate this purchase note?'),
+            __('Duplicate this purchase item?'),
             __('A copy will be created that you can edit.'),
             false,
             'o-document-duplicate',
@@ -82,7 +82,7 @@ class Index extends Component
         $this->authorize('create', Purchase::class);
         $purchase = Purchase::findOrFail($id);
         $copy = app(DuplicatePurchase::class)->execute($purchase, $this->actor());
-        $this->success(__('Purchase note duplicated.'));
+        $this->success(__('Purchase item duplicated.'));
         $this->redirectRoute('admin.purchases.edit', ['purchase' => $copy->id], navigate: true);
     }
 
@@ -98,7 +98,7 @@ class Index extends Component
             $purchase = Purchase::findOrFail($this->toDeleteId);
             $this->authorize('delete', $purchase);
             app(DeletePurchase::class)->execute($purchase, $this->actor());
-            $this->success(__('Purchase note deleted.'));
+            $this->success(__('Purchase item deleted.'));
         }
 
         $this->deleteModalOpen = false;

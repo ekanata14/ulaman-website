@@ -6,24 +6,21 @@
     {{-- HEADER PUBLIK --}}
     <header class="bg-base-100 border-b border-base-300 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-            <div class="min-w-0">
-                <h1 class="font-bold text-base md:text-lg truncate">{{ __('Ulaman Purchase Log') }}</h1>
-                <p class="text-xs text-gray-500 hidden sm:block">{{ __('Renovation project purchase records') }}</p>
-            </div>
+            <a href="{{ route('home') }}" wire:navigate class="shrink-0">
+                <img src="{{ asset('assets/images/ulaman-logo.png') }}" alt="{{ __('Ulaman Purchase Log') }}"
+                    class="h-10 md:h-12 w-auto" />
+            </a>
             {{-- Di mobile kontrol pindah ke bottom navbar; language-switcher tetap
-                 dirender (di-hide) agar listener set-locale-nya aktif. --}}
+                 dirender (di-hide) agar listener set-locale-nya aktif. Admin Login
+                 diletakkan paling kanan (pojok kanan). --}}
             <div class="items-center gap-2 shrink-0 hidden lg:flex">
                 <button wire:click="$dispatch('open-guest-search')"
                     class="btn btn-sm btn-ghost gap-1">
                     <x-icon name="o-magnifying-glass" class="w-4 h-4" /> {{ __('Search') }}
                 </button>
+                <livewire:language-switcher />
                 <x-button label="{{ __('Admin Login') }}" icon="o-lock-closed" link="{{ route('login') }}"
                     class="btn-sm btn-ghost" responsive />
-            </div>
-            {{-- Dirender sekali; di mobile hanya di-hide (display:none) sehingga
-                 listener set-locale untuk bottom navbar tetap aktif. --}}
-            <div class="shrink-0 hidden lg:block">
-                <livewire:language-switcher />
             </div>
         </div>
     </header>
@@ -39,7 +36,7 @@
                 <button wire:click="$set('viewMode', 'nota')"
                     class="btn btn-sm join-item {{ $viewMode === 'nota' ? 'btn-primary' : 'btn-ghost' }}">
                     <x-icon name="o-document-text" class="w-4 h-4" />
-                    <span class="hidden sm:inline">{{ __('Note Mode') }}</span>
+                    <span class="hidden sm:inline">{{ __('Item Mode') }}</span>
                 </button>
                 <button wire:click="$set('viewMode', 'item')"
                     class="btn btn-sm join-item {{ $viewMode === 'item' ? 'btn-primary' : 'btn-ghost' }}">
@@ -82,10 +79,8 @@
                 <x-input type="date" label="{{ __('To') }}" wire:model.live="endDate" />
                 <x-choices-offline label="{{ __('Suppliers') }}" wire:model.live="supplierIds" :options="$suppliers"
                     searchable placeholder="{{ __('All') }}" />
-                <x-choices-offline label="{{ __('Categories') }}" wire:model.live="categoryIds" :options="$categories"
-                    searchable placeholder="{{ __('All') }}" />
                 <div class="sm:col-span-2">
-                    <x-input label="{{ __('Search') }}" placeholder="{{ __('Description, note no., remark') }}..."
+                    <x-input label="{{ __('Search') }}" placeholder="{{ __('Description, item no., remark') }}..."
                         wire:model.live.debounce.400ms="search" icon="o-magnifying-glass" clearable />
                 </div>
                 <x-toggle label="{{ __('With Photo') }}" wire:model.live="onlyWithPhoto" class="mt-2" />

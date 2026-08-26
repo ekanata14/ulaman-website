@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\DiscountType;
-use App\Enums\PaymentMethod;
 use App\Enums\PurchaseStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -20,8 +19,6 @@ class Purchase extends Model
         'tanggal',
         'supplier_id',
         'nomor_nota',
-        'category_id',
-        'metode_bayar',
         'remark',
         'status',
         'subtotal',
@@ -40,7 +37,6 @@ class Purchase extends Model
     protected $casts = [
         'tanggal' => 'date',
         'status' => PurchaseStatus::class,
-        'metode_bayar' => PaymentMethod::class,
         'diskon_nota_tipe' => DiscountType::class,
         'needs_review' => 'boolean',
         'subtotal' => 'decimal:2',
@@ -55,12 +51,6 @@ class Purchase extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
-    }
-
-    /** @return BelongsTo<Category, $this> */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     /** @return BelongsTo<User, $this> */
@@ -90,7 +80,13 @@ class Purchase extends Model
     /** @return HasMany<PurchasePhoto, $this> */
     public function photos(): HasMany
     {
-        return $this->hasMany(PurchasePhoto::class);
+        return $this->hasMany(PurchasePhoto::class)->where('jenis', 'nota');
+    }
+
+    /** @return HasMany<PurchasePhoto, $this> */
+    public function buktiTransfers(): HasMany
+    {
+        return $this->hasMany(PurchasePhoto::class)->where('jenis', 'bukti_transfer');
     }
 
     /**

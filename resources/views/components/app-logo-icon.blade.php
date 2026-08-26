@@ -1,1 +1,2 @@
-<x-icon name="o-building-storefront" {{ $attributes->merge(['class' => 'size-6']) }} />
+<img src="{{ asset('assets/images/ulaman-logo.png') }}" alt="{{ config('app.name') }}"
+    {{ $attributes->merge(['class' => 'object-contain']) }} />

@@ -3,7 +3,7 @@
 @endphp
 
 <div>
-    <x-modal wire:model="modalOpen" :title="$purchase?->kode ?? __('Purchase Note')" separator
+    <x-modal wire:model="modalOpen" :title="$purchase?->kode ?? __('Purchase Item')" separator
         box-class="max-w-3xl">
         @if ($purchase)
             {{-- INFO NOTA --}}
@@ -17,12 +17,8 @@
                     <div class="font-semibold">{{ $purchase->supplier?->nama ?? __('Lain-lain') }}</div>
                 </div>
                 <div>
-                    <div class="text-gray-400 text-xs">{{ __('Note No.') }}</div>
+                    <div class="text-gray-400 text-xs">{{ __('Item No.') }}</div>
                     <div class="font-semibold">{{ $purchase->nomor_nota ?? '—' }}</div>
-                </div>
-                <div>
-                    <div class="text-gray-400 text-xs">{{ __('Payment Method') }}</div>
-                    <div class="font-semibold">{{ $purchase->metode_bayar?->label() ?? '—' }}</div>
                 </div>
             </div>
 
@@ -91,7 +87,7 @@
             {{-- FOTO NOTA --}}
             @if (count($photos) > 0)
                 <div class="mt-4" x-data="{ urls: @js(collect($photos)->pluck('full')->values()) }">
-                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">{{ __('Nota Photos') }}</div>
+                    <div class="text-xs font-bold text-gray-500 uppercase mb-2">{{ __('Item Photos') }}</div>
                     <div class="grid grid-cols-4 md:grid-cols-6 gap-2">
                         @foreach ($photos as $idx => $photo)
                             <img src="{{ $photo['thumb'] }}"
@@ -102,7 +98,7 @@
                 </div>
             @endif
         @else
-            <div class="text-center py-8 text-gray-500">{{ __('Note not found.') }}</div>
+            <div class="text-center py-8 text-gray-500">{{ __('Purchase item not found.') }}</div>
         @endif
 
         <x-slot:actions>

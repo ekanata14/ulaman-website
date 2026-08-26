@@ -8,6 +8,5 @@ class ItemData
         public ?int $id,
         public string $nama,
         public ?int $unitId = null,
-        public ?int $categoryId = null,
     ) {}
 }

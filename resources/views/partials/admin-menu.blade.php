@@ -4,7 +4,7 @@
     @if (in_array($role, ['super_admin', 'admin'], true))
         <x-menu-item title="{{ __('Dashboard') }}" icon="o-home" link="{{ route('admin.dashboard') }}"
             data-tour="nav-dashboard" />
-        <x-menu-item title="{{ __('Purchase Notes') }}" icon="o-document-text"
+        <x-menu-item title="{{ __('Purchase Items') }}" icon="o-document-text"
             link="{{ route('admin.purchases') }}" data-tour="nav-purchases" />
         <x-menu-item title="{{ __('Spreadsheet') }}" icon="o-table-cells"
             link="{{ route('admin.spreadsheet') }}" data-tour="nav-spreadsheet" />
@@ -16,8 +16,6 @@
             data-tour="nav-items" />
         <x-menu-item title="{{ __('Units') }}" icon="o-scale" link="{{ route('admin.units') }}"
             data-tour="nav-units" />
-        <x-menu-item title="{{ __('Categories') }}" icon="o-tag" link="{{ route('admin.categories') }}"
-            data-tour="nav-categories" />
 
         <x-menu-separator title="{{ __('Tools') }}" />
         <x-menu-item title="{{ __('Import Excel') }}" icon="o-arrow-up-tray"

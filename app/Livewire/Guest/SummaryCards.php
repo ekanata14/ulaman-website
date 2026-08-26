@@ -37,7 +37,6 @@ class SummaryCards extends Component
             dari: $this->filter['dari'] ?? null,
             sampai: $this->filter['sampai'] ?? null,
             supplierIds: $this->filter['supplierIds'] ?? [],
-            categoryIds: $this->filter['categoryIds'] ?? [],
             search: $this->filter['search'] ?? null,
             onlyWithPhoto: (bool) ($this->filter['onlyWithPhoto'] ?? false),
         );

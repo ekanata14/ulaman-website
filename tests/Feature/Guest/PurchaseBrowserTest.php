@@ -24,7 +24,7 @@ function nota(string $supplierNama, string $harga, string $tanggal, PurchaseStat
         new PurchaseData(
             id: null, tanggal: $tanggal,
             supplier: new SupplierData(id: $supplier->id, nama: ''),
-            nomorNota: null, categoryId: null, metodeBayar: null, remark: null,
+            nomorNota: null, remark: null,
             status: $status, diskonNotaTipe: null, diskonNotaNilai: '0',
             items: [new PurchaseItemData(
                 uid: 'a', id: null, itemId: null, deskripsi: 'Barang', qty: '1',

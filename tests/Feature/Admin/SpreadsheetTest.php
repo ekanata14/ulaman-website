@@ -35,8 +35,8 @@ function ssItem(string $uid, string $desc, string $qty, string $harga, DiscountT
 function ssMake(User $a, array $items, array $bundles = [], string $tanggal = '2026-08-06', ?DiscountType $notaTipe = null, string $notaNilai = '0'): Purchase
 {
     return app(StorePurchase::class)->execute(new PurchaseData(
-        id: null, tanggal: $tanggal, supplier: null, nomorNota: null, categoryId: null,
-        metodeBayar: null, remark: null, status: PurchaseStatus::FINAL,
+        id: null, tanggal: $tanggal, supplier: null, nomorNota: null,
+        remark: null, status: PurchaseStatus::FINAL,
         diskonNotaTipe: $notaTipe, diskonNotaNilai: $notaNilai,
         items: $items, bundles: $bundles,
     ), $a);
@@ -107,17 +107,29 @@ it('spreadsheet: hapus item terakhir menghapus seluruh nota', function () {
     expect(Purchase::find($p->id))->toBeNull();
 });
 
-it('spreadsheet: tambah nota baru', function () {
+it('spreadsheet: openAddForm membuka modal form lengkap (mode tambah)', function () {
+    Livewire::actingAs(ssActor())->test(Spreadsheet::class)
+        ->call('openAddForm')
+        ->assertSet('formModalOpen', true)
+        ->assertSet('editingPurchaseId', null);
+});
+
+it('spreadsheet: openEditForm membuka modal form lengkap untuk nota terpilih', function () {
     $a = ssActor();
+    $p = ssMake($a, [ssItem('a', 'Semen', '1', '1000')], tanggal: '2026-08-06');
 
     Livewire::actingAs($a)->test(Spreadsheet::class)
-        ->set('ndTanggal', '2026-08-10')
-        ->set('ndDeskripsi', 'Semen Gresik')
-        ->set('ndQty', '2')
-        ->set('ndHarga', '50000')
-        ->call('saveNota');
+        ->call('openEditForm', $p->id)
+        ->assertSet('formModalOpen', true)
+        ->assertSet('editingPurchaseId', $p->id);
+});
 
-    expect(Purchase::whereHas('items', fn ($q) => $q->where('deskripsi', 'Semen Gresik'))->exists())->toBeTrue();
+it('spreadsheet: event purchase-form-saved menutup modal', function () {
+    Livewire::actingAs(ssActor())->test(Spreadsheet::class)
+        ->call('openAddForm')
+        ->assertSet('formModalOpen', true)
+        ->call('closeForm')
+        ->assertSet('formModalOpen', false);
 });
 
 it('spreadsheet: loadMore menaikkan limit', function () {

@@ -12,6 +12,7 @@ use App\Livewire\Admin\Purchase\Form;
 use App\Livewire\Admin\Purchase\PhotoUploader;
 use App\Models\Supplier;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 
 function bpUser(): User
@@ -84,8 +85,6 @@ it('kasus nyata UD. Harta Ayu — HARGA_PAKET 26jt → grand total 26.000.000', 
         tanggal: '2026-08-06',
         supplier: new SupplierData(id: $supplier->id, nama: ''),
         nomorNota: 'HARTA-AYU-01',
-        categoryId: null,
-        metodeBayar: null,
         remark: null,
         status: PurchaseStatus::FINAL,
         diskonNotaTipe: null,
@@ -116,8 +115,8 @@ it('kasus nyata UD. Harta Ayu — HARGA_PAKET 26jt → grand total 26.000.000', 
 it('PhotoUploader merender untuk nota tersimpan', function () {
     $purchase = app(StorePurchase::class)->execute(
         new PurchaseData(
-            id: null, tanggal: '2026-08-06', supplier: null, nomorNota: null, categoryId: null,
-            metodeBayar: null, remark: null, status: PurchaseStatus::FINAL, diskonNotaTipe: null,
+            id: null, tanggal: '2026-08-06', supplier: null, nomorNota: null,
+            remark: null, status: PurchaseStatus::FINAL, diskonNotaTipe: null,
             diskonNotaNilai: '0', items: [simpleItem('a', '1000')], bundles: [],
         ),
         bpUser(),
@@ -125,5 +124,23 @@ it('PhotoUploader merender untuk nota tersimpan', function () {
 
     Livewire::actingAs(bpUser())
         ->test(PhotoUploader::class, ['purchase' => $purchase])
+        ->assertOk();
+});
+
+it('PhotoUploader tetap merender saat properti berisi upload sementara (regresi shadow $photos)', function () {
+    $purchase = app(StorePurchase::class)->execute(
+        new PurchaseData(
+            id: null, tanggal: '2026-08-06', supplier: null, nomorNota: null,
+            remark: null, status: PurchaseStatus::FINAL, diskonNotaTipe: null,
+            diskonNotaNilai: '0', items: [simpleItem('a', '1000')], bundles: [],
+        ),
+        bpUser(),
+    );
+
+    // Properti publik `photos` menampung TemporaryUploadedFile; view harus memakai
+    // `savedPhotos`, bukan `photos`, agar tidak crash "as array".
+    Livewire::actingAs(bpUser())
+        ->test(PhotoUploader::class, ['purchase' => $purchase])
+        ->set('photos', [UploadedFile::fake()->image('a.jpg')])
         ->assertOk();
 });

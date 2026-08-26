@@ -1,13 +1,13 @@
 <div>
 <x-card class="bg-base-100 shadow-sm mb-6">
-    <x-slot:title><span class="font-bold text-lg">{{ __('Nota Photos') }}</span></x-slot:title>
+    <x-slot:title><span class="font-bold text-lg">{{ __('Item Photos') }}</span></x-slot:title>
 
     {{-- UPLOAD (kompresi klien + kamera langsung di mobile) --}}
     <div x-data="photoUpload">
         <input type="file" x-ref="input" accept="image/*" capture="environment" multiple
             class="file-input file-input-bordered w-full" @change="handle($event)" :disabled="uploading" />
         <div class="text-xs text-gray-400 mt-1">
-            {{ __('Max 5 photos, 10 MB each. Compressed on your device before upload.') }}
+            {{ __('Max 5 photos, 50 MB each. Compressed on your device before upload.') }}
         </div>
         <div x-show="uploading" class="mt-2">
             <progress class="progress progress-primary w-full" :value="progress" max="100"></progress>
@@ -20,10 +20,10 @@
     </div>
 
     {{-- GALERI --}}
-    @if (count($photos) > 0)
+    @if (count($savedPhotos) > 0)
         <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4"
-            x-data="{ urls: @js(collect($photos)->pluck('full')->values()) }">
-            @foreach ($photos as $idx => $photo)
+            x-data="{ urls: @js(collect($savedPhotos)->pluck('full')->values()) }">
+            @foreach ($savedPhotos as $idx => $photo)
                 <div class="relative group" wire:key="photo-{{ $photo['id'] }}">
                     <img src="{{ $photo['thumb'] }}" alt="{{ $photo['nama'] }}"
                         class="w-full h-28 object-cover rounded-lg border border-base-300 cursor-pointer"

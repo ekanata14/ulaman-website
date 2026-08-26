@@ -45,13 +45,17 @@
                         <tr wire:key="{{ $unit->id }}">
                             <th>{{ $loop->iteration + ($units->firstItem() - 1) }}</th>
                             <td>
-                                <div class="font-bold">{{ $unit->nama }}</div>
+                                <a href="{{ route('admin.units.show', $unit) }}" wire:navigate
+                                    class="font-bold hover:underline">{{ $unit->nama }}</a>
                             </td>
                             <td><span class="text-gray-500">{{ $unit->simbol ?? '-' }}</span></td>
                             <td>
                                 <span class="badge badge-ghost badge-sm">{{ $unit->items_count }}</span>
                             </td>
                             <td class="text-right">
+                                <x-button icon="o-document-magnifying-glass"
+                                    link="{{ route('admin.units.show', $unit) }}"
+                                    class="btn-sm btn-ghost text-gray-500" tooltip="{{ __('Detail') }}" />
                                 <x-button icon="o-pencil-square" wire:click="edit({{ $unit->id }})"
                                     class="btn-sm btn-ghost text-blue-500" />
                                 <x-button icon="o-trash" wire:click="confirmDelete({{ $unit->id }})"
@@ -74,7 +78,7 @@
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingId ? __('Edit Satuan') : __('Tambah Satuan')" separator>
         <x-form wire:submit="confirmSave">
-            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-scale" />
+            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-scale" required />
             <x-input label="{{ __('Simbol') }}" wire:model="simbol" icon="o-hashtag" />
 
             <x-slot:actions>

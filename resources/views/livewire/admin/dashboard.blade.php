@@ -4,7 +4,7 @@
     {{-- HEADER --}}
     <x-header title="{{ __('Dashboard') }}" subtitle="{{ __('Purchase overview') }}" separator progress-indicator>
         <x-slot:actions>
-            <x-button label="{{ __('Purchase Notes') }}" icon="o-document-text" link="{{ route('admin.purchases') }}"
+            <x-button label="{{ __('Purchase Items') }}" icon="o-document-text" link="{{ route('admin.purchases') }}"
                 class="btn-outline btn-sm" />
         </x-slot:actions>
     </x-header>
@@ -13,7 +13,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-tour="dash-stats">
         <x-stat title="{{ __('Total Spending') }}" value="{{ Money::format($summary->total) }}" icon="o-banknotes"
             class="bg-base-100 shadow-sm border-l-4 border-primary" color="text-primary" />
-        <x-stat title="{{ __('Total Notes') }}" value="{{ number_format($summary->notaCount, 0, ',', '.') }}"
+        <x-stat title="{{ __('Total Items') }}" value="{{ number_format($summary->notaCount, 0, ',', '.') }}"
             icon="o-document-text" class="bg-base-100 shadow-sm border-l-4 border-info" color="text-info" />
         <x-stat title="{{ __('Total Items') }}" value="{{ number_format($summary->itemCount, 0, ',', '.') }}"
             icon="o-cube" class="bg-base-100 shadow-sm border-l-4 border-success" color="text-success" />
@@ -21,27 +21,6 @@
             icon="o-building-storefront" class="bg-base-100 shadow-sm border-l-4 border-secondary"
             color="text-secondary" />
     </div>
-
-    {{-- NEEDS REVIEW ALERT --}}
-    @if ($needsReviewCount > 0)
-        <x-card class="bg-warning/10 border border-warning/40 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <x-icon name="o-exclamation-triangle" class="w-8 h-8 text-warning" />
-                    <div>
-                        <div class="font-bold text-base-content">
-                            {{ trans_choice('{1} :count note needs review|[2,*] :count notes need review', $needsReviewCount, ['count' => number_format($needsReviewCount, 0, ',', '.')]) }}
-                        </div>
-                        <div class="text-sm text-gray-500">
-                            {{ __('Please review notes flagged during import or correction.') }}
-                        </div>
-                    </div>
-                </div>
-                <x-button label="{{ __('Review Now') }}" icon="o-arrow-right" link="{{ route('admin.purchases') }}"
-                    class="btn-warning btn-sm" />
-            </div>
-        </x-card>
-    @endif
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" data-tour="dash-chart">
         {{-- MONTHLY TREND CHART --}}
@@ -93,7 +72,7 @@
     </div>
 
     {{-- RECENT NOTES --}}
-    <x-card title="{{ __('Recent Notes') }}" class="bg-base-100 shadow-sm" data-tour="dash-recent">
+    <x-card title="{{ __('Recent Items') }}" class="bg-base-100 shadow-sm" data-tour="dash-recent">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>
@@ -115,7 +94,7 @@
                     @empty
                         <tr>
                             <td colspan="4" class="text-center py-10 text-gray-500">
-                                {{ __('No notes recorded yet.') }}
+                                {{ __('No purchase items recorded yet.') }}
                             </td>
                         </tr>
                     @endforelse

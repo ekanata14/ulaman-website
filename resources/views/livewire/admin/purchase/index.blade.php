@@ -1,6 +1,6 @@
 <div>
     {{-- HEADER --}}
-    <x-header title="{{ __('Purchase Notes') }}" subtitle="{{ __('Recorded purchase notes') }}" separator
+    <x-header title="{{ __('Purchase Items') }}" subtitle="{{ __('Recorded purchase items') }}" separator
         progress-indicator>
         <x-slot:actions>
             <span data-tour="purchase-export">
@@ -11,7 +11,7 @@
                 </x-dropdown>
             </span>
             <span data-tour="purchase-add">
-                <x-button label="{{ __('Add Note') }}" icon="o-plus" class="btn-primary"
+                <x-button label="{{ __('Add Purchase Item') }}" icon="o-plus" class="btn-primary"
                     link="{{ route('admin.purchases.create') }}" />
             </span>
         </x-slot:actions>
@@ -19,7 +19,7 @@
 
     {{-- FILTER BAR --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 items-end" data-tour="purchase-filter">
-        <x-input placeholder="{{ __('Code / note no.') }}..." wire:model.live.debounce="search"
+        <x-input placeholder="{{ __('Code / item no.') }}..." wire:model.live.debounce="search"
             icon="o-magnifying-glass" />
         <x-input type="date" label="{{ __('From') }}" wire:model.live="dari" />
         <x-input type="date" label="{{ __('To') }}" wire:model.live="sampai" />
@@ -72,7 +72,7 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-10 text-gray-500">
-                                {{ __('No purchase notes found.') }}
+                                {{ __('No purchase items found.') }}
                             </td>
                         </tr>
                     @endforelse
@@ -83,8 +83,8 @@
     </x-card>
 
     {{-- DELETE CONFIRM --}}
-    <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Delete Purchase Note?') }}"
-        text="{{ __('This will remove the note and all its items. This action cannot be undone.') }}"
+    <x-modal-confirm wire:model="deleteModalOpen" title="{{ __('Delete Purchase Item?') }}"
+        text="{{ __('This will remove the purchase item and all its lines. This action cannot be undone.') }}"
         confirm-text="{{ __('Yes, Delete') }}" method="delete" />
 
     {{-- MODAL KONFIRMASI GENERIK --}}

@@ -42,8 +42,8 @@
 
                 <x-form wire:submit="saveProfile">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <x-input label="{{ __('Name') }}" wire:model="name" icon="o-user" inline />
-                        <x-input label="{{ __('Email Address') }}" wire:model="email" icon="o-envelope" inline />
+                        <x-input label="{{ __('Name') }}" wire:model="name" icon="o-user" required />
+                        <x-input label="{{ __('Email Address') }}" wire:model="email" icon="o-envelope" required />
 
                         <div class="md:col-span-2">
                             {{-- Input file disesuaikan ke profile_photo --}}
@@ -75,7 +75,7 @@
                         {{-- Current Password --}}
                         <div class="relative" x-data="{ show: false }">
                             <x-input label="{{ __('Current Password') }}" wire:model="current_password"
-                                x-bind:type="show ? 'text' : 'password'" icon="o-key" class="pr-10" />
+                                x-bind:type="show ? 'text' : 'password'" icon="o-key" class="pr-10" required />
                             <button type="button" @click="show = !show"
                                 class="absolute right-3 top-10 text-gray-400 hover:text-primary transition">
                                 <x-icon name="o-eye" x-show="!show" class="w-4 h-4" />
@@ -87,7 +87,7 @@
                         <div class="relative" x-data="{ show: false }">
                             <x-input label="{{ __('New Password') }}" wire:model="new_password"
                                 x-bind:type="show ? 'text' : 'password'" icon="o-lock-closed" class="pr-10"
-                                hint="{{ __('Minimum 8 characters') }}" />
+                                hint="{{ __('Minimum 8 characters') }}" required />
                             <button type="button" @click="show = !show"
                                 class="absolute right-3 top-10 text-gray-400 hover:text-primary transition">
                                 <x-icon name="o-eye" x-show="!show" class="w-4 h-4" />
@@ -98,7 +98,7 @@
                         {{-- Confirm New Password --}}
                         <div class="relative" x-data="{ show: false }">
                             <x-input label="{{ __('Confirm New Password') }}" wire:model="new_password_confirmation"
-                                x-bind:type="show ? 'text' : 'password'" icon="o-check-circle" class="pr-10" />
+                                x-bind:type="show ? 'text' : 'password'" icon="o-check-circle" class="pr-10" required />
                             <button type="button" @click="show = !show"
                                 class="absolute right-3 top-10 text-gray-400 hover:text-primary transition">
                                 <x-icon name="o-eye" x-show="!show" class="w-4 h-4" />

@@ -69,6 +69,7 @@
                         icon="o-envelope"
                         placeholder="you@company.com"
                         class="rounded-xl border-slate-200 focus:border-[#A8894C] focus:ring-[#A8894C]"
+                        required
                     />
                 </div>
 
@@ -81,6 +82,7 @@
                         icon="o-lock-closed"
                         placeholder="••••••••"
                         class="rounded-xl border-slate-200 focus:border-[#A8894C] focus:ring-[#A8894C] pr-10"
+                        required
                     />
                     {{-- Toggle Button --}}
                     <button type="button" @click="show = !show" class="absolute right-4 bottom-3 text-slate-400 hover:text-[#A8894C] transition focus:outline-none">

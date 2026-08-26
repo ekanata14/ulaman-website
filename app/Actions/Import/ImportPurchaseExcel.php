@@ -83,8 +83,6 @@ class ImportPurchaseExcel implements ShouldQueue
                     tanggal: $nota['tanggal'],
                     supplier: new SupplierData(id: null, nama: $nota['supplier']),
                     nomorNota: $nota['nomorNota'],
-                    categoryId: null,
-                    metodeBayar: null,
                     remark: null,
                     status: PurchaseStatus::FINAL,
                     diskonNotaTipe: DiscountType::from((string) $nota['diskonNotaTipe']),

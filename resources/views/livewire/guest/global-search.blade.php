@@ -6,14 +6,14 @@
 
         {{-- INPUT --}}
         <x-input wire:model.live.debounce.300ms="q" icon="o-magnifying-glass" autofocus
-            placeholder="{{ __('Search suppliers, categories, items, notes') }}..." clearable />
+            placeholder="{{ __('Search suppliers, items') }}..." clearable />
 
         <div class="mt-4 max-h-[60vh] overflow-y-auto -mx-1 px-1 space-y-5">
             @if (! $hasQuery)
                 <div class="py-10 text-center text-gray-400 text-sm">
                     {{ __('Type at least 2 characters to search.') }}
                 </div>
-            @elseif ($results['suppliers']->isEmpty() && $results['categories']->isEmpty() && $results['items']->isEmpty() && $results['notes']->isEmpty())
+            @elseif ($results['suppliers']->isEmpty() && $results['items']->isEmpty() && $results['notes']->isEmpty())
                 <div class="py-10 text-center text-gray-400 text-sm">
                     {{ __('No data found.') }}
                 </div>
@@ -41,22 +41,6 @@
                     </div>
                 @endif
 
-                {{-- CATEGORIES --}}
-                @if ($results['categories']->isNotEmpty())
-                    <div>
-                        <div class="text-[11px] font-bold uppercase tracking-wide text-gray-400 mb-1 px-2">
-                            {{ __('Categories') }}</div>
-                        @foreach ($results['categories'] as $category)
-                            <button type="button" wire:key="c-{{ $category->id }}"
-                                wire:click="pickCategory({{ $category->id }})"
-                                class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 text-left">
-                                <x-icon name="o-tag" class="w-5 h-5 text-primary shrink-0" />
-                                <div class="font-medium truncate">{{ $category->nama }}</div>
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
-
                 {{-- ITEMS --}}
                 @if ($results['items']->isNotEmpty())
                     <div>
@@ -70,7 +54,7 @@
                                 <div class="min-w-0">
                                     <div class="font-medium truncate">{{ $item->nama }}</div>
                                     <div class="text-xs text-gray-500 truncate">
-                                        {{ collect([$item->category?->nama, $item->unit?->nama])->filter()->implode(' · ') ?: __('Item') }}
+                                        {{ $item->unit?->nama ?: __('Item') }}
                                     </div>
                                 </div>
                             </button>
@@ -82,7 +66,7 @@
                 @if ($results['notes']->isNotEmpty())
                     <div>
                         <div class="text-[11px] font-bold uppercase tracking-wide text-gray-400 mb-1 px-2">
-                            {{ __('Notes') }}</div>
+                            {{ __('Purchase Items') }}</div>
                         @foreach ($results['notes'] as $note)
                             <button type="button" wire:key="n-{{ $note->id }}"
                                 wire:click="pickNote({{ $note->id }})"

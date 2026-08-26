@@ -4,7 +4,6 @@ namespace App\Livewire\Admin\Purchase;
 
 use App\Actions\Purchase\BuildPurchaseData;
 use App\Actions\Purchase\DeletePurchase;
-use App\Actions\Purchase\StorePurchase;
 use App\Actions\Purchase\UpdatePurchase;
 use App\Actions\Report\GetPurchaseNotasForSpreadsheet;
 use App\Concerns\WithConfirmation;
@@ -14,7 +13,6 @@ use App\DTOs\Purchase\PurchaseItemData;
 use App\DTOs\Supplier\SupplierData;
 use App\Enums\DiscountType;
 use App\Enums\PurchaseStatus;
-use App\Models\Category;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Models\User;
@@ -23,6 +21,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Mary\Traits\Toast;
@@ -48,9 +47,6 @@ class Spreadsheet extends Component
     public ?int $supplierId = null;
 
     #[Url(history: true)]
-    public ?int $categoryId = null;
-
-    #[Url(history: true)]
     public string $status = '';
 
     /** all | range | month | year */
@@ -72,18 +68,12 @@ class Spreadsheet extends Component
     // --- INFINITE SCROLL ---
     public int $limit = 20;
 
-    // --- DRAFT NOTA BARU ---
-    public bool $notaModalOpen = false;
+    // --- MODAL FORM LENGKAP (tambah/edit di halaman ini, tanpa pindah) ---
+    public bool $formModalOpen = false;
 
-    public string $ndTanggal = '';
+    public ?int $editingPurchaseId = null;
 
-    public ?int $ndSupplierId = null;
-
-    public string $ndDeskripsi = '';
-
-    public string $ndQty = '1';
-
-    public string $ndHarga = '';
+    public int $formInstanceKey = 0;
 
     public function mount(): void
     {
@@ -92,13 +82,12 @@ class Spreadsheet extends Component
         $now = CarbonImmutable::now();
         $this->year ??= (int) $now->format('Y');
         $this->month ??= (int) $now->format('n');
-        $this->ndTanggal = $now->format('Y-m-d');
     }
 
     public function updated(string $property): void
     {
         if (in_array($property, [
-            'search', 'supplierId', 'categoryId', 'status',
+            'search', 'supplierId', 'status',
             'periodMode', 'year', 'month', 'dari', 'sampai',
         ], true)) {
             $this->limit = 20;
@@ -112,7 +101,7 @@ class Spreadsheet extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'supplierId', 'categoryId', 'status', 'dari', 'sampai']);
+        $this->reset(['search', 'supplierId', 'status', 'dari', 'sampai']);
         $this->periodMode = 'all';
         $this->limit = 20;
     }
@@ -200,63 +189,28 @@ class Spreadsheet extends Component
         $this->success(__('Item added.'));
     }
 
-    public function openNotaModal(): void
+    public function openAddForm(): void
     {
         $this->authorize('create', Purchase::class);
-        $this->reset(['ndSupplierId', 'ndDeskripsi', 'ndHarga']);
-        $this->ndTanggal = CarbonImmutable::now()->format('Y-m-d');
-        $this->ndQty = '1';
-        $this->notaModalOpen = true;
+        $this->editingPurchaseId = null;
+        $this->formInstanceKey++;
+        $this->formModalOpen = true;
     }
 
-    public function confirmSaveNota(): void
+    public function openEditForm(int $purchaseId): void
     {
-        $this->validate([
-            'ndTanggal' => ['required', 'date', 'before_or_equal:tomorrow'],
-            'ndSupplierId' => ['nullable', 'integer', 'exists:suppliers,id'],
-            'ndDeskripsi' => ['required', 'string', 'max:255'],
-            'ndQty' => ['required', 'numeric', 'min:0.01'],
-            'ndHarga' => ['nullable', 'numeric', 'min:0'],
-        ]);
-        $this->askConfirm('saveNota', [], __('Save this note?'), '', false, 'o-check-circle', __('Yes, Save'));
+        $this->authorize('update', Purchase::findOrFail($purchaseId));
+        $this->editingPurchaseId = $purchaseId;
+        $this->formInstanceKey++;
+        $this->formModalOpen = true;
     }
 
-    public function saveNota(): void
+    #[On('purchase-form-saved')]
+    #[On('purchase-form-cancel')]
+    public function closeForm(): void
     {
-        $this->authorize('create', Purchase::class);
-
-        $data = new PurchaseData(
-            id: null,
-            tanggal: $this->ndTanggal,
-            supplier: $this->ndSupplierId !== null ? new SupplierData(id: $this->ndSupplierId, nama: '') : null,
-            nomorNota: null,
-            categoryId: null,
-            metodeBayar: null,
-            remark: null,
-            status: PurchaseStatus::FINAL,
-            diskonNotaTipe: null,
-            diskonNotaNilai: '0',
-            items: [
-                new PurchaseItemData(
-                    uid: (string) Str::uuid(),
-                    id: null,
-                    itemId: null,
-                    deskripsi: $this->ndDeskripsi,
-                    qty: $this->ndQty,
-                    unitId: null,
-                    hargaSatuan: $this->ndHarga === '' ? null : $this->ndHarga,
-                    diskonTipe: DiscountType::NONE,
-                    diskonNilai: '0',
-                    remark: null,
-                    urutan: 0,
-                ),
-            ],
-            bundles: [],
-        );
-
-        app(StorePurchase::class)->execute($data, $this->actor());
-        $this->notaModalOpen = false;
-        $this->success(__('Purchase note saved.'));
+        $this->formModalOpen = false;
+        $this->editingPurchaseId = null;
     }
 
     public function confirmDeleteItem(int $purchaseId, int $itemId): void
@@ -265,7 +219,7 @@ class Spreadsheet extends Component
             'deleteItem',
             [$purchaseId, $itemId],
             __('Remove this item?'),
-            __('If it is the last item, the whole note is deleted.'),
+            __('If it is the last line, the whole purchase item is deleted.'),
             true,
             'o-trash',
             __('Yes, Remove'),
@@ -283,7 +237,7 @@ class Spreadsheet extends Component
         if ($remaining === []) {
             $this->authorize('delete', $purchase);
             app(DeletePurchase::class)->execute($purchase, $this->actor());
-            $this->success(__('Purchase note deleted.'));
+            $this->success(__('Purchase item deleted.'));
 
             return;
         }
@@ -300,8 +254,8 @@ class Spreadsheet extends Component
         $this->askConfirm(
             'deleteNota',
             [$purchaseId],
-            __('Delete this purchase note?'),
-            __('This will remove the note and all its items. This action cannot be undone.'),
+            __('Delete this purchase item?'),
+            __('This will remove the purchase item and all its lines. This action cannot be undone.'),
             true,
             'o-trash',
             __('Yes, Delete'),
@@ -313,7 +267,7 @@ class Spreadsheet extends Component
         $purchase = Purchase::findOrFail($purchaseId);
         $this->authorize('delete', $purchase);
         app(DeletePurchase::class)->execute($purchase, $this->actor());
-        $this->success(__('Purchase note deleted.'));
+        $this->success(__('Purchase item deleted.'));
     }
 
     /**
@@ -389,7 +343,6 @@ class Spreadsheet extends Component
             dari: $dari,
             sampai: $sampai,
             supplierIds: $this->supplierId !== null ? [$this->supplierId] : [],
-            categoryIds: $this->categoryId !== null ? [$this->categoryId] : [],
             search: $this->search,
         );
     }
@@ -440,10 +393,9 @@ class Spreadsheet extends Component
             'notas' => $notas,
             'hasMore' => $hasMore,
             'totalNotas' => $totalNotas,
+            'editingPurchase' => $this->editingPurchaseId !== null ? Purchase::find($this->editingPurchaseId) : null,
             'suppliers' => Supplier::query()->orderBy('nama')->get()
                 ->map(fn (Supplier $s): array => ['id' => $s->id, 'name' => $s->nama])->all(),
-            'categories' => Category::query()->orderBy('nama')->get()
-                ->map(fn (Category $c): array => ['id' => $c->id, 'name' => $c->nama])->all(),
             'statusOptions' => collect(PurchaseStatus::cases())
                 ->map(fn (PurchaseStatus $s): array => ['id' => $s->value, 'name' => $s->label()])->all(),
             'years' => $this->availableYears(),

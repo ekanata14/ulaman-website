@@ -12,7 +12,6 @@ class UpdateItem
         $item->update([
             'nama' => trim($data->nama),
             'unit_id' => $data->unitId,
-            'category_id' => $data->categoryId,
         ]);
 
         return $item;

@@ -17,7 +17,7 @@
         <x-card class="bg-base-100 shadow-sm">
             <x-form wire:submit="toPreview">
                 <div data-tour="import-file">
-                    <x-file wire:model="file" label="{{ __('Excel File (.xlsx)') }}" accept=".xlsx,.xls"
+                    <x-file wire:model="file" label="{{ __('Excel File (.xlsx)') }}" accept=".xlsx,.xls" required
                         hint="{{ __('Max 20 MB. 12 monthly sheets; recap sheets are skipped. Download the example template below.') }}" />
                 </div>
                 <div wire:loading wire:target="file" class="text-sm text-gray-500 mt-2">
@@ -38,7 +38,7 @@
     {{-- STEP 2: PREVIEW --}}
     @if ($step === 2 && $preview)
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-            <x-stat title="{{ __('Notes') }}" value="{{ number_format($preview->totalNota, 0, ',', '.') }}"
+            <x-stat title="{{ __('Items') }}" value="{{ number_format($preview->totalNota, 0, ',', '.') }}"
                 icon="o-document-text" />
             <x-stat title="{{ __('Item Rows') }}" value="{{ number_format($preview->totalItem, 0, ',', '.') }}"
                 icon="o-cube" />
@@ -97,7 +97,7 @@
                         <progress class="progress progress-primary w-full"
                             value="{{ $p['done'] ?? 0 }}" max="{{ max(1, $p['total'] ?? 1) }}"></progress>
                         <div class="text-sm text-gray-500 mt-2">
-                            {{ $p['done'] ?? 0 }} / {{ $p['total'] ?? 0 }} {{ __('notes') }}
+                            {{ $p['done'] ?? 0 }} / {{ $p['total'] ?? 0 }} {{ __('items') }}
                         </div>
                         <div class="text-xs text-gray-400 mt-1">
                             {{ __('Requires a running queue worker (php artisan queue:work).') }}
@@ -143,7 +143,7 @@
                     {{ __('Discrepancies are flagged for physical-receipt review (not auto-fixed).') }}
                 </x-alert>
                 <div class="mt-4">
-                    <x-button label="{{ __('View Notes') }}" icon="o-arrow-right" link="{{ route('admin.purchases') }}"
+                    <x-button label="{{ __('View Items') }}" icon="o-arrow-right" link="{{ route('admin.purchases') }}"
                         class="btn-primary" />
                 </div>
             @endif

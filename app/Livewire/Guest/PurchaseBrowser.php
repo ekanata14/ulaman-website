@@ -6,7 +6,6 @@ use App\Actions\Report\GetPurchaseItemList;
 use App\Actions\Report\GetPurchaseList;
 use App\Actions\Report\GetPurchaseNotasForSpreadsheet;
 use App\DTOs\Purchase\PurchaseFilterData;
-use App\Models\Category;
 use App\Models\Supplier;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -35,10 +34,6 @@ class PurchaseBrowser extends Component
     /** @var array<int, int> */
     #[Url(as: 'supplier', history: true)]
     public array $supplierIds = [];
-
-    /** @var array<int, int> */
-    #[Url(as: 'kategori', history: true)]
-    public array $categoryIds = [];
 
     #[Url(as: 'q', history: true)]
     public string $search = '';
@@ -70,7 +65,6 @@ class PurchaseBrowser extends Component
             filled($this->startDate),
             filled($this->endDate),
             count($this->supplierIds) > 0,
-            count($this->categoryIds) > 0,
             filled($this->search),
             $this->onlyWithPhoto,
         ])->filter()->count();
@@ -79,7 +73,7 @@ class PurchaseBrowser extends Component
     public function updated(string $property): void
     {
         if (in_array($property, [
-            'startDate', 'endDate', 'supplierIds', 'categoryIds',
+            'startDate', 'endDate', 'supplierIds',
             'search', 'viewMode', 'onlyWithPhoto', 'sort', 'order', 'perPage',
         ], true)) {
             $this->resetPage();
@@ -94,14 +88,6 @@ class PurchaseBrowser extends Component
     public function applySupplier(int $id): void
     {
         $this->supplierIds = [$id];
-        $this->viewMode = 'nota';
-        $this->resetPage();
-    }
-
-    #[On('guest-filter-category')]
-    public function applyCategory(int $id): void
-    {
-        $this->categoryIds = [$id];
         $this->viewMode = 'nota';
         $this->resetPage();
     }
@@ -130,7 +116,7 @@ class PurchaseBrowser extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['startDate', 'endDate', 'supplierIds', 'categoryIds', 'search', 'onlyWithPhoto']);
+        $this->reset(['startDate', 'endDate', 'supplierIds', 'search', 'onlyWithPhoto']);
         $this->resetPage();
     }
 
@@ -143,7 +129,6 @@ class PurchaseBrowser extends Component
             'dari' => $this->startDate,
             'sampai' => $this->endDate,
             'supplierIds' => array_map('intval', $this->supplierIds),
-            'categoryIds' => array_map('intval', $this->categoryIds),
             'search' => $this->search,
             'onlyWithPhoto' => $this->onlyWithPhoto,
         ];
@@ -155,7 +140,6 @@ class PurchaseBrowser extends Component
             dari: $this->startDate,
             sampai: $this->endDate,
             supplierIds: array_map('intval', $this->supplierIds),
-            categoryIds: array_map('intval', $this->categoryIds),
             search: $this->search,
             viewMode: $this->viewMode,
             onlyWithPhoto: $this->onlyWithPhoto,
@@ -180,8 +164,6 @@ class PurchaseBrowser extends Component
             'filterArray' => $this->filterArray(),
             'suppliers' => Supplier::query()->orderBy('nama')->get()
                 ->map(fn (Supplier $s): array => ['id' => $s->id, 'name' => $s->nama])->all(),
-            'categories' => Category::query()->orderBy('nama')->get()
-                ->map(fn (Category $c): array => ['id' => $c->id, 'name' => $c->nama])->all(),
         ]);
     }
 }

@@ -11,7 +11,6 @@ class Item extends Model
     protected $fillable = [
         'nama',
         'unit_id',
-        'category_id',
         'harga_terakhir',
         'supplier_terakhir_id',
     ];
@@ -24,12 +23,6 @@ class Item extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
-    }
-
-    /** @return BelongsTo<Category, $this> */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 
     /** @return BelongsTo<Supplier, $this> */

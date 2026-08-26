@@ -74,6 +74,18 @@ it('menolak foto ke-6', function () {
     ))->toThrow(RuntimeException::class, 'Maksimal 5 foto per nota.');
 });
 
+it('menolak berkas melebihi 50 MB', function () {
+    Storage::fake(config('filesystems.default'));
+    Queue::fake();
+
+    $user = User::factory()->create(['role' => 'admin']);
+    $purchase = makeTestPurchase();
+    $file = UploadedFile::fake()->create('big.jpg', 51201, 'image/jpeg'); // 51201 KB > 50 MB
+
+    expect(fn () => app(StoreNotaPhoto::class)->execute($purchase, $file, $user))
+        ->toThrow(RuntimeException::class, 'Ukuran berkas melebihi 50 MB.');
+});
+
 it('menolak berkas non-gambar', function () {
     Storage::fake(config('filesystems.default'));
     Queue::fake();

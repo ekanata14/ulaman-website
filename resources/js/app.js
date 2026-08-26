@@ -159,3 +159,51 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// Bukti transfer: kompres hanya gambar (PDF diunggah apa adanya) dan biarkan
+// menggantung di properti `buktiTransfers` sampai nota disimpan (§F-05).
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('buktiTransferUpload', () => ({
+        uploading: false,
+        progress: 0,
+        async handle(event) {
+            const files = Array.from(event.target.files || []);
+            if (!files.length) {
+                return;
+            }
+
+            this.uploading = true;
+            this.progress = 0;
+
+            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 2000, useWebWorker: true };
+            const prepared = [];
+            for (const file of files) {
+                if (file.type && file.type.startsWith('image/')) {
+                    try {
+                        prepared.push(await imageCompression(file, options));
+                    } catch (error) {
+                        prepared.push(file);
+                    }
+                } else {
+                    prepared.push(file);
+                }
+            }
+
+            this.$wire.uploadMultiple(
+                'buktiTransfers',
+                prepared,
+                () => {
+                    this.uploading = false;
+                    this.progress = 0;
+                    this.$refs.input.value = '';
+                },
+                () => {
+                    this.uploading = false;
+                },
+                (progressEvent) => {
+                    this.progress = progressEvent.detail.progress;
+                },
+            );
+        },
+    }));
+});

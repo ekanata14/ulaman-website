@@ -45,8 +45,6 @@
                     icon="o-magnifying-glass" class="w-56" />
                 <x-select placeholder="{{ __('All Suppliers') }}" wire:model.live="supplierId" :options="$suppliers"
                     class="w-44" />
-                <x-select placeholder="{{ __('All Categories') }}" wire:model.live="categoryId" :options="$categories"
-                    class="w-40" />
                 <x-select placeholder="{{ __('All Status') }}" wire:model.live="status" :options="$statusOptions"
                     class="w-36" />
                 <x-select wire:model.live="periodMode" :options="$periodOptions" class="w-32" />
@@ -67,10 +65,10 @@
                 <div class="ml-auto flex items-center gap-2">
                     <span class="text-xs text-gray-500 hidden xl:inline whitespace-nowrap">
                         {{ __('Showing') }} {{ $notas->count() }} / {{ number_format($totalNotas, 0, ',', '.') }}
-                        {{ __('notes') }}
+                        {{ __('items') }}
                     </span>
-                    <x-button label="{{ __('Add Nota') }}" icon="o-plus" class="btn-primary btn-sm"
-                        wire:click="openNotaModal" />
+                    <x-button label="{{ __('Add Item') }}" icon="o-plus" class="btn-primary btn-sm"
+                        wire:click="openAddForm" />
                     <livewire:language-switcher :key="'ls-focus'" />
                     <x-theme-toggle class="btn btn-circle btn-ghost btn-sm" />
                     <a href="{{ route('admin.spreadsheet') }}" wire:navigate class="btn btn-sm btn-ghost gap-1"
@@ -87,7 +85,7 @@
             <x-slot:actions>
                 <x-button label="{{ __('Fullscreen') }}" icon="o-arrows-pointing-out"
                     link="{{ route('admin.spreadsheet', ['focus' => 1]) }}" wire:navigate class="btn-ghost" />
-                <x-button label="{{ __('Add Nota') }}" icon="o-plus" class="btn-primary" wire:click="openNotaModal" />
+                <x-button label="{{ __('Add Item') }}" icon="o-plus" class="btn-primary" wire:click="openAddForm" />
             </x-slot:actions>
         </x-header>
 
@@ -97,8 +95,6 @@
                 icon="o-magnifying-glass" />
             <x-select placeholder="{{ __('All Suppliers') }}" wire:model.live="supplierId" :options="$suppliers"
                 icon="o-building-storefront" />
-            <x-select placeholder="{{ __('All Categories') }}" wire:model.live="categoryId" :options="$categories"
-                icon="o-tag" />
             <x-select placeholder="{{ __('All Status') }}" wire:model.live="status" :options="$statusOptions"
                 icon="o-flag" />
         </div>
@@ -123,7 +119,7 @@
 
             <div class="ml-auto text-sm text-gray-500 self-center">
                 {{ __('Showing') }} {{ $notas->count() }} / {{ number_format($totalNotas, 0, ',', '.') }}
-                {{ __('notes') }}
+                {{ __('items') }}
             </div>
         </div>
     @endif
@@ -158,7 +154,7 @@
                                     <span class="flex items-center gap-2 font-bold uppercase text-xs tracking-wide text-primary">
                                         <x-icon name="o-calendar" class="w-4 h-4" />
                                         {{ \Carbon\CarbonImmutable::createFromFormat('Y-m', $ym)->translatedFormat('F Y') }}
-                                        <span class="badge badge-ghost badge-sm normal-case">{{ $group->count() }} {{ __('notes') }}</span>
+                                        <span class="badge badge-ghost badge-sm normal-case">{{ $group->count() }} {{ __('items') }}</span>
                                     </span>
                                     <span class="font-mono text-sm font-bold text-primary">{{ Money::format($monthSubtotal) }}</span>
                                 </div>
@@ -215,9 +211,9 @@
                                 <td class="align-top text-right font-mono pt-2 whitespace-nowrap">
                                     {{ Money::format((string) $item->net_total) }}
                                     @if ($hasAdj)
-                                        <a href="{{ route('admin.purchases.edit', $nota->id) }}" wire:navigate
+                                        <button type="button" wire:click="openEditForm({{ $nota->id }})"
                                             title="{{ __('Has discount/bundle — edit in full editor') }}"
-                                            class="ml-1 text-amber-500">★</a>
+                                            class="ml-1 text-amber-500">★</button>
                                     @endif
                                 </td>
                                 {{-- REMARK --}}
@@ -231,10 +227,10 @@
                                     @if ($isFirst)
                                         <x-button icon="o-plus" wire:click="addItemRow({{ $nota->id }})"
                                             class="btn-xs btn-ghost text-primary" tooltip-left="{{ __('Add item') }}" />
-                                        <x-button icon="o-pencil-square" link="{{ route('admin.purchases.edit', $nota->id) }}"
+                                        <x-button icon="o-pencil-square" wire:click="openEditForm({{ $nota->id }})"
                                             class="btn-xs btn-ghost text-blue-500" tooltip-left="{{ __('Full editor') }}" />
                                         <x-button icon="o-trash" wire:click="confirmDeleteNota({{ $nota->id }})"
-                                            class="btn-xs btn-ghost text-red-500" tooltip-left="{{ __('Delete note') }}" />
+                                            class="btn-xs btn-ghost text-red-500" tooltip-left="{{ __('Delete item') }}" />
                                     @else
                                         <x-button icon="o-x-mark" wire:click="confirmDeleteItem({{ $nota->id }}, {{ $item->id }})"
                                             class="btn-xs btn-ghost text-red-400" tooltip-left="{{ __('Remove item') }}" />
@@ -246,7 +242,7 @@
                     @empty
                         <tr>
                             <td colspan="8" class="text-center py-10 text-gray-500">
-                                {{ __('No purchase notes found.') }}
+                                {{ __('No purchase items found.') }}
                             </td>
                         </tr>
                     @endforelse
@@ -276,24 +272,13 @@
     </button>
     </div>
 
-    {{-- ADD NOTA MODAL --}}
-    <x-modal wire:model="notaModalOpen" title="{{ __('Add Nota') }}" separator>
-        <x-form wire:submit="confirmSaveNota">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <x-input type="date" label="{{ __('Date') }}" wire:model="ndTanggal" />
-                <x-select label="{{ __('Supplier') }}" wire:model="ndSupplierId" :options="$suppliers"
-                    placeholder="{{ __('Lain-lain') }}" />
-            </div>
-            <x-input label="{{ __('Description') }}" wire:model="ndDeskripsi" />
-            <div class="grid grid-cols-2 gap-3">
-                <x-input type="number" step="0.01" label="{{ __('Qty') }}" wire:model="ndQty" />
-                <x-money-input label="{{ __('Item Price') }}" prefix="Rp" wire-model="ndHarga" :value="$ndHarga" />
-            </div>
-            <x-slot:actions>
-                <x-button label="{{ __('Batal') }}" @click="$wire.notaModalOpen = false" />
-                <x-button label="{{ __('Simpan') }}" type="submit" class="btn-primary" spinner="confirmSaveNota" />
-            </x-slot:actions>
-        </x-form>
+    {{-- MODAL FORM LENGKAP (tambah/edit tanpa pindah halaman) --}}
+    <x-modal wire:model="formModalOpen" box-class="max-w-5xl" separator
+        :title="$editingPurchase ? __('Edit Purchase Item') : __('Add Purchase Item')">
+        @if ($formModalOpen)
+            <livewire:admin.purchase.form :purchase="$editingPurchase" :embedded="true"
+                :key="'ss-form-' . $formInstanceKey" />
+        @endif
     </x-modal>
 
     {{-- MODAL KONFIRMASI GENERIK --}}

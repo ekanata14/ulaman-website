@@ -2,7 +2,6 @@
 
 namespace App\Actions\Report;
 
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Purchase;
 use App\Models\Supplier;
@@ -10,15 +9,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Pencarian global read-only untuk halaman guest: supplier, kategori, item, dan
- * nota final. Tanpa tulis DB / transaksi. Eager load relasi (anti N+1).
+ * Pencarian global read-only untuk halaman guest: supplier, item, dan nota final.
+ * Tanpa tulis DB / transaksi. Eager load relasi (anti N+1).
  */
 class SearchCatalog
 {
     /**
      * @return array{
      *     suppliers: Collection<int, Supplier>,
-     *     categories: Collection<int, Category>,
      *     items: Collection<int, Item>,
      *     notes: Collection<int, Purchase>,
      * }
@@ -40,14 +38,8 @@ class SearchCatalog
                 ->limit(6)
                 ->get(),
 
-            'categories' => Category::query()
-                ->where('nama', 'like', $like)
-                ->orderBy('nama')
-                ->limit(6)
-                ->get(),
-
             'items' => Item::query()
-                ->with(['unit', 'category'])
+                ->with(['unit'])
                 ->where('nama', 'like', $like)
                 ->orderBy('nama')
                 ->limit(8)

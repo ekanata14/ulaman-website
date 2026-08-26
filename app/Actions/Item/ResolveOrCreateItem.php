@@ -10,7 +10,7 @@ use App\Models\Item;
  */
 class ResolveOrCreateItem
 {
-    public function execute(string $nama, bool $autoCreate = true, ?int $unitId = null, ?int $categoryId = null): ?Item
+    public function execute(string $nama, bool $autoCreate = true, ?int $unitId = null): ?Item
     {
         $nama = trim($nama);
         if ($nama === '') {
@@ -32,7 +32,6 @@ class ResolveOrCreateItem
         return Item::create([
             'nama' => $nama,
             'unit_id' => $unitId,
-            'category_id' => $categoryId,
         ]);
     }
 }

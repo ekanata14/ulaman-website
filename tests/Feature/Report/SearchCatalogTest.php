@@ -2,14 +2,12 @@
 
 use App\Actions\Report\SearchCatalog;
 use App\Enums\PurchaseStatus;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Purchase;
 use App\Models\Supplier;
 
 beforeEach(function () {
-    $this->kategori = Category::create(['nama' => 'Semen Bangunan']);
-    Item::create(['nama' => 'Semen Gresik', 'category_id' => $this->kategori->id]);
+    Item::create(['nama' => 'Semen Gresik']);
 
     $this->supplierAktif = Supplier::create(['nama' => 'CV Semen Jaya', 'pic' => 'Budi', 'is_active' => true]);
     Supplier::create(['nama' => 'PT Semen Mati', 'is_active' => false]);
@@ -24,11 +22,10 @@ beforeEach(function () {
     ]);
 });
 
-it('mencari supplier, kategori, item, dan nota berdasarkan istilah', function () {
+it('mencari supplier, item, dan nota berdasarkan istilah', function () {
     $r = app(SearchCatalog::class)->execute('semen');
 
     expect($r['suppliers']->pluck('nama'))->toContain('CV Semen Jaya')
-        ->and($r['categories']->pluck('nama'))->toContain('Semen Bangunan')
         ->and($r['items']->pluck('nama'))->toContain('Semen Gresik')
         ->and($r['notes']->pluck('kode'))->toContain('NT-FINAL-1');
 });

@@ -2,15 +2,13 @@
 
 use App\Enums\PurchaseStatus;
 use App\Livewire\Guest\GlobalSearch;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use Livewire\Livewire;
 
 beforeEach(function () {
-    $this->kategori = Category::create(['nama' => 'Semen Bangunan']);
-    $this->item = Item::create(['nama' => 'Semen Gresik', 'category_id' => $this->kategori->id]);
+    $this->item = Item::create(['nama' => 'Semen Gresik']);
     $this->supplier = Supplier::create(['nama' => 'CV Semen Jaya', 'is_active' => true]);
     $this->nota = Purchase::create([
         'kode' => 'NT-FINAL-1', 'tanggal' => '2026-08-10', 'status' => PurchaseStatus::FINAL->value,

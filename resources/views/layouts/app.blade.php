@@ -7,6 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title . ' - ' . config('app.name') : config('app.name') }}</title>
 
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" sizes="any">
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon-32.png') }}?v=2">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=2">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -34,7 +38,8 @@
 
             {{-- BRAND --}}
             <div class="px-6 pb-3 pt-6 flex items-center gap-3">
-                <x-icon name="o-building-storefront" class="w-9 h-9 text-primary" />
+                <img src="{{ asset('assets/images/ulaman-mark.png') }}" alt="{{ config('app.name') }}"
+                    class="w-9 h-9 object-contain" />
                 <div class="leading-tight">
                     <h2 class="font-bold text-lg">{{ config('app.name') }}</h2>
                 </div>

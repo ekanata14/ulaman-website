@@ -10,9 +10,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UnitSeeder::class,
-            CategorySeeder::class,
             SupplierSeeder::class,
             AdminUserSeeder::class,
+            PurchaseImportSeeder::class,
         ]);
 
         $this->command->info('Seeded successfully.');

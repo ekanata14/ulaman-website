@@ -67,8 +67,8 @@ class Wizard extends Component
         $this->askConfirm(
             'execute',
             [],
-            __('Import all notes into the database?'),
-            __('All parsed notes will be created. This runs a queued import job.'),
+            __('Import all items into the database?'),
+            __('All parsed items will be created. This runs a queued import job.'),
             false,
             'o-arrow-down-tray',
             __('Yes, Import'),

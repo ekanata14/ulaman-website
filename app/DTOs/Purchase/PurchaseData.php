@@ -4,7 +4,6 @@ namespace App\DTOs\Purchase;
 
 use App\DTOs\Supplier\SupplierData;
 use App\Enums\DiscountType;
-use App\Enums\PaymentMethod;
 use App\Enums\PurchaseStatus;
 
 /**
@@ -21,8 +20,6 @@ class PurchaseData
         public string $tanggal,
         public ?SupplierData $supplier,
         public ?string $nomorNota,
-        public ?int $categoryId,
-        public ?PaymentMethod $metodeBayar,
         public ?string $remark,
         public PurchaseStatus $status,
         public ?DiscountType $diskonNotaTipe,

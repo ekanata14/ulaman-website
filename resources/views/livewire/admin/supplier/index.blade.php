@@ -53,7 +53,8 @@
                         <tr wire:key="{{ $supplier->id }}">
                             <th>{{ $loop->iteration + ($suppliers->firstItem() - 1) }}</th>
                             <td>
-                                <div class="font-bold">{{ $supplier->nama }}</div>
+                                <a href="{{ route('admin.suppliers.show', $supplier) }}" wire:navigate
+                                    class="font-bold hover:underline">{{ $supplier->nama }}</a>
                                 @if ($supplier->alamat)
                                     <div class="text-xs text-gray-500 max-w-[220px] truncate">{{ $supplier->alamat }}
                                     </div>
@@ -72,6 +73,9 @@
                                 @endif
                             </td>
                             <td class="text-right">
+                                <x-button icon="o-document-magnifying-glass"
+                                    link="{{ route('admin.suppliers.show', $supplier) }}"
+                                    class="btn-sm btn-ghost text-gray-500" tooltip="{{ __('Detail') }}" />
                                 <x-button icon="{{ $supplier->is_active ? 'o-eye-slash' : 'o-eye' }}"
                                     wire:click="confirmToggleActive({{ $supplier->id }})"
                                     class="btn-sm btn-ghost text-amber-500"
@@ -98,7 +102,7 @@
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingId ? __('Edit Supplier') : __('Tambah Supplier')" separator>
         <x-form wire:submit="confirmSave">
-            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-building-storefront" />
+            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-building-storefront" required />
             <x-input label="{{ __('PIC') }}" wire:model="pic" icon="o-user" />
             <x-input label="{{ __('Telepon') }}" wire:model="telepon" icon="o-phone" />
             <x-textarea label="{{ __('Alamat') }}" wire:model="alamat" rows="2" />

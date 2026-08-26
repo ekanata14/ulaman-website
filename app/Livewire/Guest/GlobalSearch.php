@@ -30,12 +30,6 @@ class GlobalSearch extends Component
         $this->close();
     }
 
-    public function pickCategory(int $id): void
-    {
-        $this->dispatch('guest-filter-category', id: $id);
-        $this->close();
-    }
-
     public function pickItem(string $nama): void
     {
         $this->dispatch('guest-search-items', term: $nama);
@@ -60,7 +54,7 @@ class GlobalSearch extends Component
 
         $results = strlen($term) >= 2
             ? $search->execute($term)
-            : ['suppliers' => collect(), 'categories' => collect(), 'items' => collect(), 'notes' => collect()];
+            : ['suppliers' => collect(), 'items' => collect(), 'notes' => collect()];
 
         return view('livewire.guest.global-search', [
             'results' => $results,

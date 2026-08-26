@@ -41,7 +41,7 @@ function purchaseData(array $items, array $bundles = [], ?int $supplierId = null
     return new PurchaseData(
         id: null, tanggal: $tanggal,
         supplier: $supplierId !== null ? new SupplierData(id: $supplierId, nama: '') : null,
-        nomorNota: 'NOTA-1', categoryId: null, metodeBayar: null, remark: null,
+        nomorNota: 'NOTA-1', remark: null,
         status: PurchaseStatus::FINAL, diskonNotaTipe: null, diskonNotaNilai: '0',
         items: $items, bundles: $bundles,
     );

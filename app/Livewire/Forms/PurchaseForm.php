@@ -8,7 +8,6 @@ use App\DTOs\Purchase\PurchaseItemData;
 use App\DTOs\Supplier\SupplierData;
 use App\Enums\BundleType;
 use App\Enums\DiscountType;
-use App\Enums\PaymentMethod;
 use App\Enums\PurchaseStatus;
 use App\Models\Purchase;
 use Illuminate\Validation\Rule;
@@ -29,13 +28,11 @@ class PurchaseForm extends Form
 
     public string $nomorNota = '';
 
-    public ?int $categoryId = null;
-
-    public ?string $metodeBayar = null;
-
-    public string $status = 'final';
-
     public ?string $remark = null;
+
+    public string $diskonNotaTipe = 'NONE';
+
+    public string $diskonNotaNilai = '0';
 
     /** @var array<int, array<string, mixed>> */
     public array $items = [];
@@ -52,10 +49,9 @@ class PurchaseForm extends Form
             'tanggal' => ['required', 'date', 'before_or_equal:tomorrow'],
             'supplierId' => ['nullable', 'integer', 'exists:suppliers,id'],
             'nomorNota' => ['nullable', 'string', 'max:50'],
-            'categoryId' => ['nullable', 'integer', 'exists:categories,id'],
-            'metodeBayar' => ['nullable', Rule::enum(PaymentMethod::class)],
-            'status' => ['required', Rule::enum(PurchaseStatus::class)],
             'remark' => ['nullable', 'string'],
+            'diskonNotaTipe' => ['required', Rule::enum(DiscountType::class)],
+            'diskonNotaNilai' => ['nullable', 'numeric', 'min:0'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.uid' => ['required', 'string'],
             'items.*.itemId' => ['nullable', 'integer', 'exists:items,id'],
@@ -79,10 +75,12 @@ class PurchaseForm extends Form
         $this->tanggal = $purchase->tanggal->format('Y-m-d');
         $this->supplierId = $purchase->supplier_id;
         $this->nomorNota = $purchase->nomor_nota ?? '';
-        $this->categoryId = $purchase->category_id;
-        $this->metodeBayar = $purchase->metode_bayar?->value;
-        $this->status = $purchase->status->value;
         $this->remark = $purchase->remark;
+        // Kolom diskon_nota_tipe nullable (null = tanpa diskon nota); baca via
+        // data_get agar aman terhadap null saat mengedit nota tanpa diskon.
+        $notaTipe = data_get($purchase, 'diskon_nota_tipe');
+        $this->diskonNotaTipe = $notaTipe instanceof DiscountType ? $notaTipe->value : 'NONE';
+        $this->diskonNotaNilai = (string) $purchase->diskon_nota_nilai;
 
         $this->items = $purchase->items
             ->map(fn ($it): array => [
@@ -145,12 +143,10 @@ class PurchaseForm extends Form
             tanggal: $this->tanggal,
             supplier: $this->supplierId !== null ? new SupplierData(id: $this->supplierId, nama: '') : null,
             nomorNota: $this->nomorNota !== '' ? $this->nomorNota : null,
-            categoryId: $this->categoryId,
-            metodeBayar: $this->metodeBayar !== null && $this->metodeBayar !== '' ? PaymentMethod::from($this->metodeBayar) : null,
             remark: $this->remark,
-            status: PurchaseStatus::from($this->status),
-            diskonNotaTipe: null,
-            diskonNotaNilai: '0',
+            status: PurchaseStatus::FINAL,
+            diskonNotaTipe: $this->diskonNotaTipe === 'NONE' ? null : DiscountType::from($this->diskonNotaTipe),
+            diskonNotaNilai: $this->diskonNotaNilai !== '' ? $this->diskonNotaNilai : '0',
             items: $items,
             bundles: $bundles,
         );

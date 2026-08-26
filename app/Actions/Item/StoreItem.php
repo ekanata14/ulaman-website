@@ -12,7 +12,6 @@ class StoreItem
         return Item::create([
             'nama' => trim($data->nama),
             'unit_id' => $data->unitId,
-            'category_id' => $data->categoryId,
         ]);
     }
 }

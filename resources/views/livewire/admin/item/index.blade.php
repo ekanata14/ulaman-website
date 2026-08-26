@@ -17,9 +17,6 @@
         <x-select wire:model.live="filterUnit" :options="array_merge([['id' => '', 'name' => __('Semua Satuan')]], $units)"
             icon="o-scale" />
 
-        <x-select wire:model.live="filterCategory" :options="array_merge([['id' => '', 'name' => __('Semua Kategori')]], $categories)"
-            icon="o-tag" />
-
         <x-select wire:model.live="sortBy" :options="[
             ['id' => 'latest', 'name' => __('Terbaru')],
             ['id' => 'oldest', 'name' => __('Terlama')],
@@ -42,7 +39,6 @@
                         <th>#</th>
                         <th>{{ __('Nama') }}</th>
                         <th>{{ __('Satuan') }}</th>
-                        <th>{{ __('Kategori') }}</th>
                         <th>{{ __('Harga Terakhir') }}</th>
                         <th>{{ __('Supplier Terakhir') }}</th>
                         <th class="text-right">{{ __('Aksi') }}</th>
@@ -53,16 +49,10 @@
                         <tr wire:key="{{ $item->id }}">
                             <th>{{ $loop->iteration + ($items->firstItem() - 1) }}</th>
                             <td>
-                                <div class="font-bold">{{ $item->nama }}</div>
+                                <a href="{{ route('admin.items.show', $item) }}" wire:navigate
+                                    class="font-bold hover:underline">{{ $item->nama }}</a>
                             </td>
                             <td><span class="text-gray-500">{{ $item->unit?->nama ?? '-' }}</span></td>
-                            <td>
-                                @if ($item->category)
-                                    <span class="badge badge-ghost badge-sm">{{ $item->category->nama }}</span>
-                                @else
-                                    <span class="text-gray-500">-</span>
-                                @endif
-                            </td>
                             <td>
                                 <span class="text-gray-500">
                                     {{ $item->harga_terakhir ? 'Rp ' . number_format((float) $item->harga_terakhir, 0, ',', '.') : '-' }}
@@ -70,6 +60,9 @@
                             </td>
                             <td><span class="text-gray-500">{{ $item->supplierTerakhir?->nama ?? '-' }}</span></td>
                             <td class="text-right">
+                                <x-button icon="o-document-magnifying-glass"
+                                    link="{{ route('admin.items.show', $item) }}"
+                                    class="btn-sm btn-ghost text-gray-500" tooltip="{{ __('Detail') }}" />
                                 <x-button icon="o-pencil-square" wire:click="edit({{ $item->id }})"
                                     class="btn-sm btn-ghost text-blue-500" />
                                 <x-button icon="o-trash" wire:click="confirmDelete({{ $item->id }})"
@@ -92,14 +85,10 @@
     {{-- MODAL FORM --}}
     <x-modal wire:model="modalOpen" :title="$editingId ? __('Edit Barang') : __('Tambah Barang')" separator>
         <x-form wire:submit="confirmSave">
-            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-cube" />
+            <x-input label="{{ __('Nama') }}" wire:model="nama" icon="o-cube" required />
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-select label="{{ __('Satuan') }}" wire:model="unit_id" :options="$units"
-                    placeholder="{{ __('Pilih satuan') }}" icon="o-scale" />
-                <x-select label="{{ __('Kategori') }}" wire:model="category_id" :options="$categories"
-                    placeholder="{{ __('Pilih kategori') }}" icon="o-tag" />
-            </div>
+            <x-select label="{{ __('Satuan') }}" wire:model="unit_id" :options="$units"
+                placeholder="{{ __('Pilih satuan') }}" icon="o-scale" />
 
             <x-slot:actions>
                 <x-button label="{{ __('Batal') }}" @click="$wire.modalOpen = false" />

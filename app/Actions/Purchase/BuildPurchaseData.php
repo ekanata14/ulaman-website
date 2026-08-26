@@ -54,8 +54,6 @@ class BuildPurchaseData
                 ? new SupplierData(id: $purchase->supplier_id, nama: '')
                 : null,
             nomorNota: $purchase->nomor_nota,
-            categoryId: $purchase->category_id,
-            metodeBayar: $purchase->metode_bayar,
             remark: $purchase->remark,
             status: $purchase->status,
             diskonNotaTipe: $purchase->diskon_nota_tipe,

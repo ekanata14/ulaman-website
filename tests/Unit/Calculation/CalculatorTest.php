@@ -41,8 +41,6 @@ function mkPurchase(array $items, array $bundles = [], ?DiscountType $notaTipe =
         tanggal: '2026-08-06',
         supplier: null,
         nomorNota: null,
-        categoryId: null,
-        metodeBayar: null,
         remark: null,
         status: PurchaseStatus::FINAL,
         diskonNotaTipe: $notaTipe,

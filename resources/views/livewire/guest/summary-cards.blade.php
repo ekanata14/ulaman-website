@@ -5,7 +5,7 @@
     // meluber di layar mobile (truncate + font mengecil di mobile).
     $cards = [
         ['title' => __('Total Purchases'), 'value' => Money::format($summary->total), 'icon' => 'o-banknotes', 'accent' => 'text-primary bg-primary/10'],
-        ['title' => __('Notes'), 'value' => number_format($summary->notaCount, 0, ',', '.'), 'icon' => 'o-document-text', 'accent' => 'text-info bg-info/10'],
+        ['title' => __('Items'), 'value' => number_format($summary->notaCount, 0, ',', '.'), 'icon' => 'o-document-text', 'accent' => 'text-info bg-info/10'],
         ['title' => __('Items'), 'value' => number_format($summary->itemCount, 0, ',', '.'), 'icon' => 'o-cube', 'accent' => 'text-success bg-success/10'],
         ['title' => __('Suppliers'), 'value' => number_format($summary->supplierCount, 0, ',', '.'), 'icon' => 'o-building-storefront', 'accent' => 'text-secondary bg-secondary/10'],
         ['title' => __('Avg / Month'), 'value' => Money::format($summary->avgPerMonth), 'icon' => 'o-chart-bar', 'accent' => 'text-warning bg-warning/10'],

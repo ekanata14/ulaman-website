@@ -15,8 +15,8 @@ use Livewire\Component;
 
 /**
  * §F-07 — Dashboard admin UPL: ringkasan all-time, tren bulanan, peringkat
- * supplier, alert nota perlu-review, dan nota terbaru. Komponen tipis: hanya
- * otorisasi + memanggil Query Action + render.
+ * supplier, dan nota terbaru. Komponen tipis: hanya otorisasi + memanggil
+ * Query Action + render.
  */
 #[Layout('layouts.app')]
 #[Title('Dashboard')]
@@ -37,7 +37,6 @@ class Dashboard extends Component
             'summary' => app(GetPurchaseSummary::class)->execute($filter),
             'trend' => app(GetMonthlyTrend::class)->execute($filter),
             'ranking' => app(GetSupplierRanking::class)->execute($filter, 5),
-            'needsReviewCount' => Purchase::query()->where('needs_review', true)->count(),
             'recent' => Purchase::query()->final()->with('supplier')->latest('tanggal')->limit(8)->get(),
         ]);
     }

@@ -24,9 +24,6 @@ trait AppliesPurchaseFilters
         if ($f->supplierIds !== []) {
             $query->whereIn('supplier_id', $f->supplierIds);
         }
-        if ($f->categoryIds !== []) {
-            $query->whereIn('category_id', $f->categoryIds);
-        }
         if ($f->onlyWithPhoto) {
             $query->has('photos');
         }

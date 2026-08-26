@@ -41,7 +41,7 @@ class PhotoUploader extends Component
 
         $this->validate([
             'photos' => ['array', 'max:5'],
-            'photos.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:10240'],
+            'photos.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:51200'],
         ]);
 
         $actor = $this->actor();
@@ -85,7 +85,7 @@ class PhotoUploader extends Component
     {
         $signer = app(GenerateSignedPhotoUrl::class);
 
-        $photos = $this->purchase->photos()->orderBy('urutan')->get()
+        $savedPhotos = $this->purchase->photos()->orderBy('urutan')->get()
             ->map(fn (PurchasePhoto $p): array => [
                 'id' => $p->id,
                 'thumb' => $signer->execute($p, true),
@@ -94,7 +94,7 @@ class PhotoUploader extends Component
             ])
             ->all();
 
-        return view('livewire.admin.purchase.photo-uploader', ['photos' => $photos]);
+        return view('livewire.admin.purchase.photo-uploader', ['savedPhotos' => $savedPhotos]);
     }
 
     private function actor(): User

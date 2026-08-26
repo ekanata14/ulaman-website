@@ -1,11 +1,8 @@
 <?php
 
-use App\Actions\Category\StoreCategory;
 use App\Actions\Unit\StoreUnit;
-use App\DTOs\Category\CategoryData;
 use App\DTOs\Unit\UnitData;
 use App\Livewire\Admin\Purchase\Form;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Supplier;
 use App\Models\Unit;
@@ -24,13 +21,6 @@ it('StoreUnit membuat satuan (nama di-trim)', function () {
     $this->assertDatabaseHas('units', ['nama' => 'kardus', 'simbol' => 'kd']);
 });
 
-it('StoreCategory membuat kategori (nama di-trim)', function () {
-    $category = app(StoreCategory::class)->execute(new CategoryData(id: null, nama: '  Cat  ', warna: '#fff'));
-
-    expect($category->nama)->toBe('Cat');
-    $this->assertDatabaseHas('categories', ['nama' => 'Cat', 'warna' => '#fff']);
-});
-
 it('quick-add supplier di form nota membuat & memilih supplier', function () {
     $component = Livewire::actingAs(qaAdmin())->test(Form::class)
         ->set('qsNama', 'PT Baru Jaya')
@@ -40,16 +30,6 @@ it('quick-add supplier di form nota membuat & memilih supplier', function () {
     $supplier = Supplier::firstWhere('nama', 'PT Baru Jaya');
     expect($supplier)->not->toBeNull();
     $component->assertSet('form.supplierId', $supplier->id);
-});
-
-it('quick-add kategori di form nota membuat & memilih kategori', function () {
-    $component = Livewire::actingAs(qaAdmin())->test(Form::class)
-        ->set('qcNama', 'Kategori Baru')
-        ->call('saveCategory');
-
-    $category = Category::firstWhere('nama', 'Kategori Baru');
-    expect($category)->not->toBeNull();
-    $component->assertSet('form.categoryId', $category->id);
 });
 
 it('quick-add satuan mengisi unitId pada baris target', function () {

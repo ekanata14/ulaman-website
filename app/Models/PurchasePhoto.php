@@ -9,6 +9,7 @@ class PurchasePhoto extends Model
 {
     protected $fillable = [
         'purchase_id',
+        'jenis',
         'path',
         'thumbnail_path',
         'nama_file_asli',

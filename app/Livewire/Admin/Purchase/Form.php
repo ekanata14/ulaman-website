@@ -3,24 +3,25 @@
 namespace App\Livewire\Admin\Purchase;
 
 use App\Actions\Calculation\CalculatePurchaseTotals;
-use App\Actions\Category\StoreCategory;
 use App\Actions\Item\StoreItem;
+use App\Actions\Photo\DeleteNotaPhoto;
+use App\Actions\Photo\GenerateSignedPhotoUrl;
+use App\Actions\Photo\StoreBuktiTransfer;
 use App\Actions\Purchase\DeletePurchase;
 use App\Actions\Purchase\StorePurchase;
 use App\Actions\Purchase\UpdatePurchase;
 use App\Actions\Supplier\StoreSupplier;
 use App\Actions\Unit\StoreUnit;
 use App\Concerns\WithConfirmation;
-use App\DTOs\Category\CategoryData;
 use App\DTOs\Item\ItemData;
 use App\DTOs\Purchase\CalculatedPurchaseData;
 use App\DTOs\Supplier\SupplierData;
 use App\DTOs\Unit\UnitData;
 use App\Enums\BundleType;
 use App\Livewire\Forms\PurchaseForm;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Purchase;
+use App\Models\PurchasePhoto;
 use App\Models\Supplier;
 use App\Models\Unit;
 use App\Models\User;
@@ -30,6 +31,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
 
 /**
@@ -40,13 +42,23 @@ use Mary\Traits\Toast;
 #[Layout('layouts.app')]
 class Form extends Component
 {
-    use AuthorizesRequests, Toast, WithConfirmation;
+    use AuthorizesRequests, Toast, WithConfirmation, WithFileUploads;
 
     public PurchaseForm $form;
 
     public ?Purchase $purchase = null;
 
+    /** Saat true, komponen di-embed dalam modal (mis. Spreadsheet): tanpa redirect/chrome. */
+    public bool $embedded = false;
+
     public bool $deleteModalOpen = false;
+
+    /**
+     * Bukti transfer yang menunggu untuk dilampirkan saat simpan (temp upload).
+     *
+     * @var array<int, \Illuminate\Http\UploadedFile>
+     */
+    public array $buktiTransfers = [];
 
     /** @var array<int, string> UID item yang dicentang untuk membentuk bundle. */
     public array $selectedForBundle = [];
@@ -66,13 +78,6 @@ class Form extends Component
 
     public ?string $qsTelepon = null;
 
-    // --- QUICK-ADD: Kategori ---
-    public bool $categoryModalOpen = false;
-
-    public string $qcNama = '';
-
-    public ?string $qcWarna = null;
-
     // --- QUICK-ADD: Satuan (per baris) ---
     public bool $unitModalOpen = false;
 
@@ -90,8 +95,6 @@ class Form extends Component
     public string $qiNama = '';
 
     public ?int $qiUnitId = null;
-
-    public ?int $qiCategoryId = null;
 
     public function mount(?Purchase $purchase = null): void
     {
@@ -130,7 +133,7 @@ class Form extends Component
         $this->askConfirm(
             'removeItem',
             [$uid],
-            __('Remove this item from the note?'),
+            __('Remove this line from the purchase item?'),
             '',
             true,
             'o-trash',
@@ -317,37 +320,6 @@ class Form extends Component
         $this->success(__('Supplier added.'));
     }
 
-    public function openCategoryModal(): void
-    {
-        $this->authorize('create', Category::class);
-        $this->reset('qcNama', 'qcWarna');
-        $this->categoryModalOpen = true;
-    }
-
-    public function confirmSaveCategory(): void
-    {
-        $this->validate([
-            'qcNama' => ['required', 'string', 'max:255'],
-            'qcWarna' => ['nullable', 'string', 'max:50'],
-        ]);
-        $this->askConfirm('saveCategory', [], __('Save this category?'), '', false, 'o-check-circle', __('Yes, Save'));
-    }
-
-    public function saveCategory(): void
-    {
-        $this->authorize('create', Category::class);
-        $category = app(StoreCategory::class)->execute(new CategoryData(
-            id: null,
-            nama: $this->qcNama,
-            warna: $this->qcWarna,
-        ));
-
-        $this->form->categoryId = $category->id;
-        $this->categoryModalOpen = false;
-        $this->reset('qcNama', 'qcWarna');
-        $this->success(__('Category added.'));
-    }
-
     public function openUnitModal(int $index): void
     {
         $this->authorize('create', Unit::class);
@@ -387,7 +359,7 @@ class Form extends Component
     {
         $this->authorize('create', Item::class);
         $this->itemTargetIndex = $index;
-        $this->reset('qiNama', 'qiUnitId', 'qiCategoryId');
+        $this->reset('qiNama', 'qiUnitId');
         $this->itemModalOpen = true;
     }
 
@@ -396,7 +368,6 @@ class Form extends Component
         $this->validate([
             'qiNama' => ['required', 'string', 'max:255', 'unique:items,nama'],
             'qiUnitId' => ['nullable', 'exists:units,id'],
-            'qiCategoryId' => ['nullable', 'exists:categories,id'],
         ]);
         $this->askConfirm('saveItem', [], __('Save this item?'), '', false, 'o-check-circle', __('Yes, Save'));
     }
@@ -408,7 +379,6 @@ class Form extends Component
             id: null,
             nama: $this->qiNama,
             unitId: $this->qiUnitId,
-            categoryId: $this->qiCategoryId,
         ));
 
         if ($this->itemTargetIndex !== null && isset($this->form->items[$this->itemTargetIndex])) {
@@ -417,13 +387,54 @@ class Form extends Component
         }
 
         $this->itemModalOpen = false;
-        $this->reset('qiNama', 'qiUnitId', 'qiCategoryId', 'itemTargetIndex');
+        $this->reset('qiNama', 'qiUnitId', 'itemTargetIndex');
         $this->success(__('Item added.'));
     }
 
     protected function validateForSave(): void
     {
         $this->form->validate();
+        $this->validate($this->buktiTransferRules());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buktiTransferRules(): array
+    {
+        return [
+            'buktiTransfers' => ['array', 'max:5'],
+            'buktiTransfers.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:51200'],
+        ];
+    }
+
+    /**
+     * Terapkan diskon (item + nota) — memicu render ulang sehingga pratinjau
+     * server (§9.1) menghitung ulang total dengan nilai diskon terkini.
+     */
+    public function applyDiscount(): void
+    {
+        $this->success(__('Discount applied.'));
+    }
+
+    public function removeBuktiTransfer(int $index): void
+    {
+        unset($this->buktiTransfers[$index]);
+        $this->buktiTransfers = array_values($this->buktiTransfers);
+    }
+
+    public function deleteBuktiTransfer(int $id): void
+    {
+        if ($this->purchase === null) {
+            return;
+        }
+
+        $this->authorize('update', $this->purchase);
+        $photo = $this->purchase->buktiTransfers()->whereKey($id)->first();
+        if ($photo !== null) {
+            app(DeleteNotaPhoto::class)->execute($photo);
+            $this->success(__('Bukti transfer deleted.'));
+        }
     }
 
     public function save(): void
@@ -434,17 +445,53 @@ class Form extends Component
         );
 
         $this->form->validate();
+        $this->validate($this->buktiTransferRules());
         $dto = $this->form->toDto();
 
         if ($this->form->purchaseId !== null && $this->purchase !== null) {
-            app(UpdatePurchase::class)->execute($this->purchase, $dto, $this->actor());
-            $this->success(__('Purchase note updated.'));
+            $purchase = app(UpdatePurchase::class)->execute($this->purchase, $dto, $this->actor());
+            $this->attachBuktiTransfers($purchase);
+            $this->success(__('Purchase item updated.'));
         } else {
-            app(StorePurchase::class)->execute($dto, $this->actor());
-            $this->success(__('Purchase note saved.'));
+            $purchase = app(StorePurchase::class)->execute($dto, $this->actor());
+            $this->attachBuktiTransfers($purchase);
+            $this->success(__('Purchase item saved.'));
+        }
+
+        if ($this->embedded) {
+            $this->dispatch('purchase-form-saved');
+
+            return;
         }
 
         $this->redirectRoute('admin.purchases', navigate: true);
+    }
+
+    public function cancelEmbedded(): void
+    {
+        $this->dispatch('purchase-form-cancel');
+    }
+
+    /**
+     * Lampirkan bukti transfer yang menunggu ke nota yang sudah tersimpan.
+     * Pola sama seperti PhotoUploader::storeUploaded (loop + Action per berkas).
+     */
+    private function attachBuktiTransfers(Purchase $purchase): void
+    {
+        if ($this->buktiTransfers === []) {
+            return;
+        }
+
+        $actor = $this->actor();
+        foreach ($this->buktiTransfers as $file) {
+            try {
+                app(StoreBuktiTransfer::class)->execute($purchase, $file, $actor);
+            } catch (\Throwable $e) {
+                $this->error($e->getMessage());
+            }
+        }
+
+        $this->buktiTransfers = [];
     }
 
     public function confirmDelete(): void
@@ -460,7 +507,14 @@ class Form extends Component
 
         $this->authorize('delete', $this->purchase);
         app(DeletePurchase::class)->execute($this->purchase, $this->actor());
-        $this->success(__('Purchase note deleted.'));
+        $this->success(__('Purchase item deleted.'));
+
+        if ($this->embedded) {
+            $this->dispatch('purchase-form-saved');
+
+            return;
+        }
+
         $this->redirectRoute('admin.purchases', navigate: true);
     }
 
@@ -483,13 +537,38 @@ class Form extends Component
             'preview' => $this->preview(),
             'suppliers' => Supplier::query()->active()->orderBy('nama')
                 ->get()->map(fn (Supplier $s): array => ['id' => $s->id, 'name' => $s->nama])->all(),
-            'categories' => Category::query()->orderBy('nama')
-                ->get()->map(fn (Category $c): array => ['id' => $c->id, 'name' => $c->nama])->all(),
             'units' => Unit::query()->orderBy('nama')
                 ->get()->map(fn (Unit $u): array => ['id' => $u->id, 'name' => $u->nama])->all(),
             'items' => Item::query()->orderBy('nama')
                 ->get()->map(fn (Item $i): array => ['id' => $i->id, 'name' => $i->nama])->all(),
+            'savedBuktiTransfers' => $this->savedBuktiTransfers(),
         ]);
+    }
+
+    /**
+     * Daftar bukti transfer yang sudah tersimpan (mode edit) untuk digambar
+     * di galeri. Nama variabel dibedakan dari properti $buktiTransfers agar
+     * tidak ter-shadow oleh properti publik saat render.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function savedBuktiTransfers(): array
+    {
+        if ($this->purchase === null) {
+            return [];
+        }
+
+        $signer = app(GenerateSignedPhotoUrl::class);
+
+        return $this->purchase->buktiTransfers()->orderBy('urutan')->get()
+            ->map(fn (PurchasePhoto $p): array => [
+                'id' => $p->id,
+                'url' => $signer->execute($p, false),
+                'thumb' => $signer->execute($p, true),
+                'nama' => $p->nama_file_asli,
+                'isPdf' => $p->mime_type === 'application/pdf',
+            ])
+            ->all();
     }
 
     private function actor(): User

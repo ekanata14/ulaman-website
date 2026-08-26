@@ -61,8 +61,6 @@ class DuplicatePurchase
             tanggal: CarbonImmutable::now()->format('Y-m-d'),
             supplier: $purchase->supplier_id !== null ? new SupplierData(id: $purchase->supplier_id, nama: '') : null,
             nomorNota: null,
-            categoryId: $purchase->category_id,
-            metodeBayar: $purchase->metode_bayar,
             remark: $purchase->remark,
             status: PurchaseStatus::DRAFT,
             diskonNotaTipe: $purchase->diskon_nota_tipe,

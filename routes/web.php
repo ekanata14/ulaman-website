@@ -3,16 +3,18 @@
 use App\Http\Controllers\NotaPhotoController;
 use App\Livewire\Admin\AuditLog\Index as AuditLogIndex;
 // Auth Routes
-use App\Livewire\Admin\Category\Index as CategoryIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\GlobalSearch;
 use App\Livewire\Admin\Import\Wizard as ImportWizard;
 use App\Livewire\Admin\Item\Index as ItemIndex;
+use App\Livewire\Admin\Item\Show as ItemShow;
 use App\Livewire\Admin\Purchase\Form as PurchaseForm;
 use App\Livewire\Admin\Purchase\Index as PurchaseIndex;
 use App\Livewire\Admin\Purchase\Spreadsheet as PurchaseSpreadsheet;
 use App\Livewire\Admin\Supplier\Index as SupplierIndex;
+use App\Livewire\Admin\Supplier\Show as SupplierShow;
 use App\Livewire\Admin\Unit\Index as UnitIndex;
+use App\Livewire\Admin\Unit\Show as UnitShow;
 use App\Livewire\Admin\User\Index as AdminUserIndex;
 use App\Livewire\Auth\Login;
 // Route khusus untuk handle klik link dari email (Laravel Handle Otomatis)
@@ -70,9 +72,11 @@ Route::middleware(['auth', 'role:super_admin|admin'])->prefix('admin')->name('ad
 
     // Master Data (§11.4)
     Route::get('/supplier', SupplierIndex::class)->name('suppliers');
+    Route::get('/supplier/{supplier}', SupplierShow::class)->name('suppliers.show');
     Route::get('/barang', ItemIndex::class)->name('items');
+    Route::get('/barang/{item}', ItemShow::class)->name('items.show');
     Route::get('/satuan', UnitIndex::class)->name('units');
-    Route::get('/kategori', CategoryIndex::class)->name('categories');
+    Route::get('/satuan/{unit}', UnitShow::class)->name('units.show');
 
     // Impor & Audit (§F-09 / §F-10)
     Route::get('/import', ImportWizard::class)->name('import');

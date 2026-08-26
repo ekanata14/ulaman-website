@@ -43,8 +43,6 @@ class StorePurchase
                 'tanggal' => $tanggal,
                 'supplier_id' => $supplier?->getKey(),
                 'nomor_nota' => $data->nomorNota,
-                'category_id' => $data->categoryId,
-                'metode_bayar' => $data->metodeBayar,
                 'remark' => $data->remark,
                 'status' => $data->status,
                 'diskon_nota_tipe' => $data->diskonNotaTipe,

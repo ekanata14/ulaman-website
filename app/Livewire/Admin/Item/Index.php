@@ -6,7 +6,6 @@ use App\Actions\Item\StoreItem;
 use App\Actions\Item\UpdateItem;
 use App\Concerns\WithConfirmation;
 use App\DTOs\Item\ItemData;
-use App\Models\Category;
 use App\Models\Item;
 use App\Models\Unit;
 use Illuminate\Contracts\View\View;
@@ -30,9 +29,6 @@ class Index extends Component
     public string $filterUnit = '';
 
     #[Url(history: true)]
-    public string $filterCategory = '';
-
-    #[Url(history: true)]
     public string $sortBy = 'latest';
 
     // --- MODAL STATES ---
@@ -49,8 +45,6 @@ class Index extends Component
 
     public ?int $unit_id = null;
 
-    public ?int $category_id = null;
-
     /**
      * @return array<string, mixed>
      */
@@ -59,7 +53,6 @@ class Index extends Component
         return [
             'nama' => 'required|string|max:255|unique:items,nama,'.$this->editingId,
             'unit_id' => 'nullable|exists:units,id',
-            'category_id' => 'nullable|exists:categories,id',
         ];
     }
 
@@ -71,7 +64,6 @@ class Index extends Component
         return [
             'nama' => __('Nama'),
             'unit_id' => __('Satuan'),
-            'category_id' => __('Kategori'),
         ];
     }
 
@@ -82,13 +74,13 @@ class Index extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'filterUnit', 'filterCategory', 'sortBy']);
+        $this->reset(['search', 'filterUnit', 'sortBy']);
         $this->resetPage();
     }
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['search', 'filterUnit', 'filterCategory', 'sortBy'])) {
+        if (in_array($property, ['search', 'filterUnit', 'sortBy'])) {
             $this->resetPage();
         }
     }
@@ -96,7 +88,7 @@ class Index extends Component
     public function create(): void
     {
         $this->authorize('create', Item::class);
-        $this->reset(['nama', 'unit_id', 'category_id', 'editingId']);
+        $this->reset(['nama', 'unit_id', 'editingId']);
         $this->modalOpen = true;
     }
 
@@ -106,7 +98,6 @@ class Index extends Component
         $this->editingId = $item->id;
         $this->nama = $item->nama;
         $this->unit_id = $item->unit_id;
-        $this->category_id = $item->category_id;
         $this->modalOpen = true;
     }
 
@@ -118,7 +109,6 @@ class Index extends Component
             id: $this->editingId,
             nama: $this->nama,
             unitId: $this->unit_id,
-            categoryId: $this->category_id,
         );
 
         if ($this->editingId) {
@@ -163,7 +153,7 @@ class Index extends Component
 
     public function render(): View
     {
-        $query = Item::query()->with(['unit', 'category', 'supplierTerakhir']);
+        $query = Item::query()->with(['unit', 'supplierTerakhir']);
 
         if ($this->search) {
             $query->where('nama', 'like', '%'.$this->search.'%');
@@ -171,10 +161,6 @@ class Index extends Component
 
         if ($this->filterUnit) {
             $query->where('unit_id', $this->filterUnit);
-        }
-
-        if ($this->filterCategory) {
-            $query->where('category_id', $this->filterCategory);
         }
 
         match ($this->sortBy) {
@@ -188,14 +174,9 @@ class Index extends Component
             ->map(fn (Unit $u): array => ['id' => $u->id, 'name' => $u->nama])
             ->all();
 
-        $categories = Category::query()->orderBy('nama')->get()
-            ->map(fn (Category $c): array => ['id' => $c->id, 'name' => $c->nama])
-            ->all();
-
         return view('livewire.admin.item.index', [
             'items' => $query->paginate(10),
             'units' => $units,
-            'categories' => $categories,
         ]);
     }
 }

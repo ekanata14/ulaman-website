@@ -133,8 +133,8 @@
                 <x-file wire:model="profile_photo" label="{{ __('Profile Photo') }}" accept="image/*" hint="Max 2MB" />
             </div>
 
-            <x-input label="{{ __('Name') }}" wire:model="name" icon="o-user" />
-            <x-input label="{{ __('Email') }}" wire:model="email" type="email" icon="o-envelope" />
+            <x-input label="{{ __('Name') }}" wire:model="name" icon="o-user" required />
+            <x-input label="{{ __('Email') }}" wire:model="email" type="email" icon="o-envelope" required />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {{-- Role --}}
@@ -143,7 +143,7 @@
                     ['id' => 'staff', 'name' => 'Staff'],
                     ['id' => 'pm', 'name' => 'Project Manager'],
                     ['id' => 'super_admin', 'name' => 'Super Admin'],
-                ]" icon="o-shield-check" />
+                ]" icon="o-shield-check" required />
 
                 {{-- Departments (Multi Select) --}}
                 <x-choices label="{{ __('Departments') }}" wire:model="departments" :options="$departmentsList"
@@ -151,6 +151,7 @@
             </div>
 
             <x-input label="{{ __('Password') }}" wire:model="password" type="password" icon="o-key"
+                :required="! $editingUserId"
                 hint="{{ $editingUserId ? __('Leave blank to keep current password') : '' }}" />
 
             <x-slot:actions>
