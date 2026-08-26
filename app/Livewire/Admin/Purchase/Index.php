@@ -156,7 +156,7 @@ class Index extends Component
         }
 
         return view('livewire.admin.purchase.index', [
-            'purchases' => $query->latest('tanggal')->latest('id')->paginate(15),
+            'purchases' => $query->oldest('tanggal')->oldest('id')->paginate(15),
             'suppliers' => Supplier::query()->orderBy('nama')
                 ->get()->map(fn (Supplier $s): array => ['id' => $s->id, 'name' => $s->nama])->all(),
             'statusOptions' => array_map(

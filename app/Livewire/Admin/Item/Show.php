@@ -34,7 +34,8 @@ class Show extends Component
             'history' => $this->item->purchaseItems()
                 ->with(['purchase.supplier', 'unit'])
                 ->join('purchases', 'purchases.id', '=', 'purchase_items.purchase_id')
-                ->orderByDesc('purchases.tanggal')
+                ->orderBy('purchases.tanggal')
+                ->orderBy('purchase_items.id')
                 ->select('purchase_items.*')
                 ->paginate(15),
         ]);

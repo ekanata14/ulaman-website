@@ -27,6 +27,6 @@ class GetPurchaseItemList
         return PurchaseItem::query()
             ->with(['purchase.supplier'])
             ->whereIn('purchase_id', $purchaseIds->select('id'))
-            ->orderByDesc('id');
+            ->orderBy('id');
     }
 }

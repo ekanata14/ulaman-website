@@ -48,7 +48,7 @@ class PurchaseBrowser extends Component
     public string $sort = 'tanggal';
 
     #[Url(history: true)]
-    public string $order = 'desc';
+    public string $order = 'asc';
 
     #[Url(history: true)]
     public int $perPage = 50;

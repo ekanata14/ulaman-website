@@ -29,6 +29,6 @@ class GetPurchaseList
 
         return $query
             ->orderBy($this->safeSort($f->sort), $this->safeOrder($f->order))
-            ->orderByDesc('id');
+            ->orderBy('id', $this->safeOrder($f->order));
     }
 }

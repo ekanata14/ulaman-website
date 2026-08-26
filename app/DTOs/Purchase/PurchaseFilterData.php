@@ -18,7 +18,7 @@ class PurchaseFilterData
         public string $viewMode = 'nota',
         public bool $onlyWithPhoto = false,
         public string $sort = 'tanggal',
-        public string $order = 'desc',
+        public string $order = 'asc',
         public int $perPage = 50,
     ) {}
 }

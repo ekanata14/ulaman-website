@@ -71,8 +71,8 @@
         </x-card>
     </div>
 
-    {{-- RECENT NOTES --}}
-    <x-card title="{{ __('Recent Items') }}" class="bg-base-100 shadow-sm" data-tour="dash-recent">
+    {{-- DAFTAR NOTA (terlama dulu) --}}
+    <x-card title="{{ __('Purchase Items') }}" class="bg-base-100 shadow-sm" data-tour="dash-recent">
         <div class="overflow-x-auto">
             <table class="table table-zebra">
                 <thead>

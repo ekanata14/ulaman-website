@@ -32,7 +32,8 @@ class Show extends Component
         return view('livewire.admin.supplier.show', [
             'detail' => app(GetSupplierPurchaseDetail::class)->execute($this->supplier),
             'recent' => $this->supplier->purchases()
-                ->latest('tanggal')
+                ->oldest('tanggal')
+                ->oldest('id')
                 ->paginate(10),
         ]);
     }

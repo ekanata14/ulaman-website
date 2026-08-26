@@ -37,7 +37,7 @@ class Dashboard extends Component
             'summary' => app(GetPurchaseSummary::class)->execute($filter),
             'trend' => app(GetMonthlyTrend::class)->execute($filter),
             'ranking' => app(GetSupplierRanking::class)->execute($filter, 5),
-            'recent' => Purchase::query()->final()->with('supplier')->latest('tanggal')->limit(8)->get(),
+            'recent' => Purchase::query()->final()->with('supplier')->oldest('tanggal')->oldest('id')->limit(8)->get(),
         ]);
     }
 }
