@@ -3,17 +3,33 @@
     <x-slot:title><span class="font-bold text-lg">{{ __('Item Photos') }}</span></x-slot:title>
 
     {{-- UPLOAD (kompresi klien + kamera langsung di mobile) --}}
-    <div x-data="photoUpload">
-        <input type="file" x-ref="input" accept="image/*" capture="environment" multiple
+    <div x-data="photoUpload({{ $maxMb }})">
+        <input type="file" x-ref="input" accept="image/jpeg,image/png,image/webp" capture="environment" multiple
             class="file-input file-input-bordered w-full" @change="handle($event)" :disabled="uploading" />
         <div class="text-xs text-gray-400 mt-1">
-            {{ __('Max 5 photos, 50 MB each. Compressed on your device before upload.') }}
+            {{ __('Max 5 photos, :size each. Compressed on your device before upload.', ['size' => $maxMb.' MB']) }}
         </div>
         <div x-show="uploading" class="mt-2">
             <progress class="progress progress-primary w-full" :value="progress" max="100"></progress>
             <span class="text-xs" x-text="`${progress}%`"></span>
         </div>
+
+        {{-- Berkas yang ditolak di klien (mis. HEIC dari iPhone) --}}
+        <template x-if="errors.length">
+            <div class="alert alert-error items-start mt-3 text-sm">
+                <x-icon name="o-exclamation-triangle" class="w-5 h-5 shrink-0" />
+                <div class="flex flex-col gap-1">
+                    <template x-for="message in errors" :key="message">
+                        <span x-text="message"></span>
+                    </template>
+                </div>
+            </div>
+        </template>
     </div>
+
+    @error('photos.*')
+        <x-alert icon="o-exclamation-triangle" class="alert-error mt-3">{{ $message }}</x-alert>
+    @enderror
 
     <div wire:loading wire:target="storeUploaded" class="text-sm text-gray-500 mt-2">
         <x-loading class="loading-sm" /> {{ __('Saving...') }}

@@ -75,3 +75,12 @@ it('form nota tetap merender dengan bukti transfer sementara di properti (regres
         ->set('buktiTransfers', [UploadedFile::fake()->image('bt.jpg')])
         ->assertOk();
 });
+
+it('bukti transfer HEIC dirender sebagai nama berkas, bukan <img> (regresi FileNotPreviewableException)', function () {
+    $component = Livewire::actingAs(pfdAdmin())->test(Form::class)
+        ->set('buktiTransfers', [UploadedFile::fake()->create('nota.heic', 100, 'image/heic')])
+        ->assertOk();
+
+    // HEIC tidak bisa dirender browser non-Safari → tampilkan ikon + nama berkas.
+    expect($component->html())->toContain('nota.heic');
+});

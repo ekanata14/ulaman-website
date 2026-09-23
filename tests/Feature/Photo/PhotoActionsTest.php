@@ -7,6 +7,7 @@ use App\Actions\Photo\StoreNotaPhoto;
 use App\Models\Purchase;
 use App\Models\PurchasePhoto;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
@@ -74,16 +75,43 @@ it('menolak foto ke-6', function () {
     ))->toThrow(RuntimeException::class, 'Maksimal 5 foto per nota.');
 });
 
-it('menolak berkas melebihi 50 MB', function () {
+it('menolak berkas melebihi batas ukuran', function () {
     Storage::fake(config('filesystems.default'));
     Queue::fake();
 
     $user = User::factory()->create(['role' => 'admin']);
     $purchase = makeTestPurchase();
-    $file = UploadedFile::fake()->create('big.jpg', 51201, 'image/jpeg'); // 51201 KB > 50 MB
+    $file = UploadedFile::fake()->create('big.jpg', Uploads::maxKb() + 1, 'image/jpeg');
 
     expect(fn () => app(StoreNotaPhoto::class)->execute($purchase, $file, $user))
-        ->toThrow(RuntimeException::class, 'Ukuran berkas melebihi 50 MB.');
+        ->toThrow(RuntimeException::class, Uploads::tooLargeMessage());
+});
+
+it('menerima berkas tepat di batas ukuran yang dikonfigurasi', function () {
+    Storage::fake(config('filesystems.default'));
+    Queue::fake();
+
+    expect(Uploads::maxMb())->toBeGreaterThan(50);
+
+    $user = User::factory()->create(['role' => 'admin']);
+    $purchase = makeTestPurchase();
+    $file = UploadedFile::fake()->create('pas.jpg', Uploads::maxKb(), 'image/jpeg');
+
+    $photo = app(StoreNotaPhoto::class)->execute($purchase, $file, $user);
+
+    expect($photo->ukuran)->toBe(Uploads::maxBytes());
+});
+
+it('menolak berkas HEIC dari kamera iPhone', function () {
+    Storage::fake(config('filesystems.default'));
+    Queue::fake();
+
+    $user = User::factory()->create(['role' => 'admin']);
+    $purchase = makeTestPurchase();
+    $file = UploadedFile::fake()->create('foto.heic', 500, 'image/heic');
+
+    expect(fn () => app(StoreNotaPhoto::class)->execute($purchase, $file, $user))
+        ->toThrow(RuntimeException::class, 'Tipe berkas tidak didukung (hanya JPG, PNG, WEBP).');
 });
 
 it('menolak berkas non-gambar', function () {

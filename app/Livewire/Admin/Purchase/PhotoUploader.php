@@ -9,6 +9,7 @@ use App\Concerns\WithConfirmation;
 use App\Models\Purchase;
 use App\Models\PurchasePhoto;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
@@ -41,7 +42,7 @@ class PhotoUploader extends Component
 
         $this->validate([
             'photos' => ['array', 'max:5'],
-            'photos.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp', 'max:51200'],
+            'photos.*' => ['file', 'mimetypes:'.implode(',', Uploads::imageMimes()), 'max:'.Uploads::maxKb()],
         ]);
 
         $actor = $this->actor();
@@ -94,7 +95,10 @@ class PhotoUploader extends Component
             ])
             ->all();
 
-        return view('livewire.admin.purchase.photo-uploader', ['savedPhotos' => $savedPhotos]);
+        return view('livewire.admin.purchase.photo-uploader', [
+            'savedPhotos' => $savedPhotos,
+            'maxMb' => Uploads::maxMb(),
+        ]);
     }
 
     private function actor(): User

@@ -5,6 +5,7 @@ namespace App\Actions\Photo;
 use App\Models\Purchase;
 use App\Models\PurchasePhoto;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Http\UploadedFile;
 
 /**
@@ -14,10 +15,6 @@ use Illuminate\Http\UploadedFile;
  */
 class StoreBuktiTransfer
 {
-    private const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'];
-
-    private const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-
     public function execute(Purchase $purchase, UploadedFile $file, User $actor): PurchasePhoto
     {
         if ($purchase->buktiTransfers()->count() >= 5) {
@@ -25,12 +22,12 @@ class StoreBuktiTransfer
         }
 
         $mime = $file->getMimeType();
-        if (! in_array($mime, self::ALLOWED_MIMES, true)) {
+        if (! in_array($mime, Uploads::buktiMimes(), true)) {
             throw new \RuntimeException('Tipe berkas tidak didukung (hanya JPG, PNG, WEBP, PDF).');
         }
 
-        if ($file->getSize() > 50 * 1024 * 1024) {
-            throw new \RuntimeException('Ukuran berkas melebihi 50 MB.');
+        if ($file->getSize() > Uploads::maxBytes()) {
+            throw new \RuntimeException(Uploads::tooLargeMessage());
         }
 
         $path = $file->store("bukti-transfer/{$purchase->id}", config('filesystems.default'));
@@ -50,7 +47,7 @@ class StoreBuktiTransfer
         ]);
         $photo->save();
 
-        if (in_array($mime, self::IMAGE_MIMES, true)) {
+        if (in_array($mime, Uploads::imageMimes(), true)) {
             GeneratePhotoThumbnail::dispatch($photo);
         }
 

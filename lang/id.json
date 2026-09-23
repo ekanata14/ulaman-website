@@ -1,5 +1,5 @@
 {
-    "Max 5 photos, 50 MB each. Compressed on your device before upload.": "Maks 5 foto, masing-masing 50 MB. Dikompres di perangkat Anda sebelum diunggah.",
+    "Max 5 photos, :size each. Compressed on your device before upload.": "Maks 5 foto, masing-masing :size. Dikompres di perangkat Anda sebelum diunggah.",
     "Global Search": "Pencarian Global",
     "Results for": "Hasil untuk",
     "Search suppliers, items, purchases, users": "Cari supplier, barang, item pembelian, pengguna",
@@ -42,7 +42,7 @@
     "Apply Discount": "Terapkan Diskon",
     "Discount applied.": "Diskon diterapkan.",
     "Bukti Transfer": "Bukti Transfer",
-    "Max 5 files, 50 MB each. JPG/PNG/WEBP/PDF. Images are compressed on your device.": "Maks 5 berkas, masing-masing 50 MB. JPG/PNG/WEBP/PDF. Gambar dikompres di perangkat Anda.",
+    "Max 5 files, :size each. JPG/PNG/WEBP/PDF. Images are compressed on your device.": "Maks 5 berkas, masing-masing :size. JPG/PNG/WEBP/PDF. Gambar dikompres di perangkat Anda.",
     "Bukti transfer deleted.": "Bukti transfer dihapus.",
     "Help / Tutorial": "Bantuan / Tutorial",
     "Start page tutorial": "Mulai tutorial halaman ini",

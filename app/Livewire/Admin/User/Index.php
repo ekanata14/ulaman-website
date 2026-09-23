@@ -8,6 +8,7 @@ use App\Actions\User\UpdateUserAction;
 use App\Concerns\WithConfirmation;
 use App\DTOs\User\UserData;
 use App\Models\User;
+use App\Support\Uploads;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -73,7 +74,7 @@ class Index extends Component
             'role' => 'required',
             'departments' => 'nullable|array',
             'password' => $this->editingUserId ? 'nullable|min:6' : 'required|min:6',
-            'profile_photo' => 'nullable|image|max:2048',
+            'profile_photo' => 'nullable|mimetypes:'.implode(',', Uploads::imageMimes()).'|max:2048',
         ];
     }
 

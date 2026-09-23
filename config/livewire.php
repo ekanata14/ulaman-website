@@ -130,13 +130,19 @@ return [
 
     'temporary_file_upload' => [
         'disk' => env('LIVEWIRE_TEMPORARY_FILE_UPLOAD_DISK'), // Example: 'local', 's3'             | Default: 'default'
-        'rules' => ['required', 'file', 'max:51200'],         // 50 MB ceiling (client compresses smaller; this is the safety cap)
+        // Batas ini harus selaras dengan config/ulaman.php (env UPLOAD_MAX_KB) —
+        // di sini env dibaca langsung karena config/livewire.php dimuat lebih dulu.
+        'rules' => ['required', 'file', 'max:'.(int) env('UPLOAD_MAX_KB', 102400)],
         'directory' => null,                                  // Example: 'tmp'                     | Default: 'livewire-tmp'
         'middleware' => null,                                 // Example: 'throttle:5,1'            | Default: 'throttle:60,1'
         'preview_mimes' => [                                  // Supported file types for temporary pre-signed file URLs...
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
             'jpg', 'jpeg', 'mpga', 'webp', 'wma',
+            // HEIC/HEIF (bawaan kamera iPhone) ikut didaftarkan supaya temporaryUrl()
+            // tidak melempar FileNotPreviewableException. Pratinjau di aplikasi tetap
+            // memakai App\Support\Uploads agar tidak menampilkan gambar rusak.
+            'heic', 'heif', 'hif',
         ],
         'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
         'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...

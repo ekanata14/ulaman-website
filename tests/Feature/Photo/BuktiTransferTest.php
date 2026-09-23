@@ -5,6 +5,7 @@ use App\Actions\Photo\StoreBuktiTransfer;
 use App\Actions\Photo\StoreNotaPhoto;
 use App\Models\Purchase;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -71,7 +72,7 @@ it('menyimpan bukti transfer PDF tanpa mengantre thumbnail', function () {
     Queue::assertNotPushed(GeneratePhotoThumbnail::class);
 });
 
-it('menolak bukti transfer melebihi 50 MB', function () {
+it('menolak bukti transfer melebihi batas ukuran', function () {
     Storage::fake(config('filesystems.default'));
     Queue::fake();
 
@@ -80,9 +81,9 @@ it('menolak bukti transfer melebihi 50 MB', function () {
 
     expect(fn () => app(StoreBuktiTransfer::class)->execute(
         $purchase,
-        UploadedFile::fake()->create('big.pdf', 51201, 'application/pdf'),
+        UploadedFile::fake()->create('big.pdf', Uploads::maxKb() + 1, 'application/pdf'),
         $user,
-    ))->toThrow(RuntimeException::class, 'Ukuran berkas melebihi 50 MB.');
+    ))->toThrow(RuntimeException::class, Uploads::tooLargeMessage());
 });
 
 it('menolak tipe berkas bukti transfer yang tidak didukung', function () {

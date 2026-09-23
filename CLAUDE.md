@@ -132,3 +132,32 @@ php artisan purchase:verify-totals              # invariant §7: Sum(net_item) =
 ```
 Definition of Done per fitur: Action ada test · komponen Livewire ada test · Larastan clean · Pint clean · validasi server penuh · tanpa N+1 · uang bebas float.
 
+## Batas Unggah Berkas (foto nota & bukti transfer)
+
+Satu sumber kebenaran: `config/ulaman.php` → `upload.max_kb`, dibaca lewat `App\Support\Uploads`
+oleh aturan validasi Livewire, penjaga di Action, dan pratinjau Blade. Ubah lewat env
+`UPLOAD_MAX_KB` (kilobyte, default `102400` = 100 MB). `config/livewire.php` membaca env yang
+sama karena config dimuat urut `ksort` — `livewire.php` dimuat sebelum `ulaman.php` sehingga
+tidak bisa memanggil `config('ulaman.*')`.
+
+Batas sisi server tidak bisa diatur dari kode aplikasi. Livewire mengirim **semua** berkas
+terpilih dalam **satu** request ke `/livewire/upload-file`, jadi `post_max_size` harus
+menampung total satu pemilihan (maks 5 berkas):
+
+| Setting | Nilai | Lokasi |
+|---------|-------|--------|
+| `upload_max_filesize` | 128M | `public/.htaccess` (mod_php) · `public/.user.ini` (PHP-FPM) |
+| `post_max_size` | 512M | idem |
+| `max_input_time` / `max_execution_time` | 600 | `public/.user.ini` |
+| `client_max_body_size` | 512M | nginx: `client_max_body_size 512M;` di blok `server`/`location` |
+
+Catatan:
+- `.user.ini` di-cache `user_ini.cache_ttl` (default 300 detik) — tunggu ±5 menit setelah diubah.
+- Generator thumbnail jalan di queue worker (CLI, memakai `php.ini` sendiri). Untuk foto sangat
+  besar, naikkan `memory_limit` worker: GD mendekode gambar penuh di memori.
+- HEIC/HEIF (bawaan kamera iPhone) **tidak didukung** — GD tidak bisa membuat thumbnail-nya dan
+  browser non-Safari tidak bisa merendernya. Input berkas memakai `accept` eksplisit
+  (JPG/PNG/WEBP) agar iOS mengirim JPEG, dan `resources/js/app.js` menolak HEIC di klien dengan
+  pesan yang jelas. HEIC/HEIF terdaftar di `livewire.temporary_file_upload.preview_mimes` semata
+  agar `temporaryUrl()` tidak melempar `FileNotPreviewableException`.
+

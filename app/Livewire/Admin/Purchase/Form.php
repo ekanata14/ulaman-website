@@ -25,6 +25,7 @@ use App\Models\PurchasePhoto;
 use App\Models\Supplier;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
@@ -404,7 +405,7 @@ class Form extends Component
     {
         return [
             'buktiTransfers' => ['array', 'max:5'],
-            'buktiTransfers.*' => ['file', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:51200'],
+            'buktiTransfers.*' => ['file', 'mimetypes:'.implode(',', Uploads::buktiMimes()), 'max:'.Uploads::maxKb()],
         ];
     }
 
@@ -542,6 +543,7 @@ class Form extends Component
             'items' => Item::query()->orderBy('nama')
                 ->get()->map(fn (Item $i): array => ['id' => $i->id, 'name' => $i->nama])->all(),
             'savedBuktiTransfers' => $this->savedBuktiTransfers(),
+            'maxMb' => Uploads::maxMb(),
         ]);
     }
 

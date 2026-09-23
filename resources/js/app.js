@@ -116,38 +116,97 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-// Kompresi gambar di sisi klien sebelum upload Livewire (§F-05).
-document.addEventListener('alpine:init', () => {
-    window.Alpine.data('photoUpload', () => ({
+// --- Penyaringan berkas unggahan (dipakai foto nota & bukti transfer) ---------
+// HEIC/HEIF adalah format bawaan kamera iPhone. Browser non-Safari tidak bisa
+// mendekodenya dan server tidak mendukungnya, jadi berkas seperti itu disaring
+// di klien: kalau lolos, Livewire melempar FileNotPreviewableException saat
+// merender pratinjau dan berkasnya tetap ditolak server.
+const HEIC_EXTENSIONS = /\.(heic|heif|hif)$/i;
+
+const IMAGE_COMPRESSION = { maxSizeMB: 1.5, maxWidthOrHeight: 2000, useWebWorker: true };
+
+function isHeicFile(file) {
+    return file.type.startsWith('image/hei') || HEIC_EXTENSIONS.test(file.name || '');
+}
+
+/**
+ * Kompres gambar (bila browser sanggup), lalu saring berkas yang tetap tidak
+ * didukung atau melebihi batas. Pemeriksaan ukuran dilakukan SETELAH kompresi
+ * supaya foto besar yang bisa dikecilkan tidak ikut ditolak.
+ *
+ * @returns {Promise<{ready: File[], errors: string[]}>}
+ */
+async function prepareUploads(files, maxMb) {
+    const ready = [];
+    const errors = [];
+    const maxBytes = maxMb * 1024 * 1024;
+
+    for (const file of files) {
+        const name = file.name || 'berkas';
+        let prepared = file;
+
+        if (file.type.startsWith('image/')) {
+            try {
+                prepared = await imageCompression(file, IMAGE_COMPRESSION);
+            } catch (error) {
+                prepared = file;
+            }
+        }
+
+        if (isHeicFile(prepared)) {
+            errors.push(`${name}: format HEIC/HEIF belum didukung. Ubah format kamera iPhone ke "Paling Kompatibel", atau pilih foto JPG/PNG.`);
+            continue;
+        }
+
+        if (maxBytes > 0 && prepared.size > maxBytes) {
+            errors.push(`${name}: ukuran melebihi ${maxMb} MB.`);
+            continue;
+        }
+
+        ready.push(prepared);
+    }
+
+    return { ready, errors };
+}
+
+/**
+ * Factory bersama untuk komponen unggah: menyaring di klien, menampilkan alasan
+ * penolakan, lalu mengunggah sisanya ke properti Livewire yang dituju.
+ */
+function uploader(maxMb, property, afterUpload = null) {
+    return {
         uploading: false,
         progress: 0,
+        errors: [],
+
         async handle(event) {
             const files = Array.from(event.target.files || []);
             if (!files.length) {
                 return;
             }
 
+            const { ready, errors } = await prepareUploads(files, maxMb);
+            this.errors = errors;
+
+            if (!ready.length) {
+                this.$refs.input.value = '';
+
+                return;
+            }
+
             this.uploading = true;
             this.progress = 0;
 
-            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 2000, useWebWorker: true };
-            const compressed = [];
-            for (const file of files) {
-                try {
-                    compressed.push(await imageCompression(file, options));
-                } catch (error) {
-                    compressed.push(file);
-                }
-            }
-
             this.$wire.uploadMultiple(
-                'photos',
-                compressed,
+                property,
+                ready,
                 () => {
                     this.uploading = false;
                     this.progress = 0;
                     this.$refs.input.value = '';
-                    this.$wire.storeUploaded();
+                    if (afterUpload) {
+                        this.$wire[afterUpload]();
+                    }
                 },
                 () => {
                     this.uploading = false;
@@ -157,53 +216,16 @@ document.addEventListener('alpine:init', () => {
                 },
             );
         },
-    }));
+    };
+}
+
+// Foto nota: berkas menunggu di properti `photos`, lalu langsung disimpan (§F-05).
+document.addEventListener('alpine:init', () => {
+    window.Alpine.data('photoUpload', (maxMb) => uploader(maxMb, 'photos', 'storeUploaded'));
 });
 
 // Bukti transfer: kompres hanya gambar (PDF diunggah apa adanya) dan biarkan
 // menggantung di properti `buktiTransfers` sampai nota disimpan (§F-05).
 document.addEventListener('alpine:init', () => {
-    window.Alpine.data('buktiTransferUpload', () => ({
-        uploading: false,
-        progress: 0,
-        async handle(event) {
-            const files = Array.from(event.target.files || []);
-            if (!files.length) {
-                return;
-            }
-
-            this.uploading = true;
-            this.progress = 0;
-
-            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 2000, useWebWorker: true };
-            const prepared = [];
-            for (const file of files) {
-                if (file.type && file.type.startsWith('image/')) {
-                    try {
-                        prepared.push(await imageCompression(file, options));
-                    } catch (error) {
-                        prepared.push(file);
-                    }
-                } else {
-                    prepared.push(file);
-                }
-            }
-
-            this.$wire.uploadMultiple(
-                'buktiTransfers',
-                prepared,
-                () => {
-                    this.uploading = false;
-                    this.progress = 0;
-                    this.$refs.input.value = '';
-                },
-                () => {
-                    this.uploading = false;
-                },
-                (progressEvent) => {
-                    this.progress = progressEvent.detail.progress;
-                },
-            );
-        },
-    }));
+    window.Alpine.data('buktiTransferUpload', (maxMb) => uploader(maxMb, 'buktiTransfers'));
 });

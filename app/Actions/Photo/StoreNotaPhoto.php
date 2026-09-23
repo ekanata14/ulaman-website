@@ -5,12 +5,14 @@ namespace App\Actions\Photo;
 use App\Models\Purchase;
 use App\Models\PurchasePhoto;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Http\UploadedFile;
 
 /**
  * §11 — Simpan satu foto nota ke disk privat & buat baris PurchasePhoto.
- * Validasi invariant (maks 5 foto, MIME sniffing, ukuran ≤ 10 MB) dilakukan
- * di sini, bukan hanya di komponen. Thumbnail dibuat via job antrean.
+ * Validasi invariant (maks 5 foto, MIME sniffing, ukuran ≤ batas
+ * App\Support\Uploads) dilakukan di sini, bukan hanya di komponen.
+ * Thumbnail dibuat via job antrean.
  */
 class StoreNotaPhoto
 {
@@ -21,12 +23,12 @@ class StoreNotaPhoto
         }
 
         $mime = $file->getMimeType();
-        if (! in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+        if (! in_array($mime, Uploads::imageMimes(), true)) {
             throw new \RuntimeException('Tipe berkas tidak didukung (hanya JPG, PNG, WEBP).');
         }
 
-        if ($file->getSize() > 50 * 1024 * 1024) {
-            throw new \RuntimeException('Ukuran berkas melebihi 50 MB.');
+        if ($file->getSize() > Uploads::maxBytes()) {
+            throw new \RuntimeException(Uploads::tooLargeMessage());
         }
 
         $path = $file->store("nota-photos/{$purchase->id}", config('filesystems.default'));

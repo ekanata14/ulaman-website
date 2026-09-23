@@ -3,9 +3,12 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # Batas unggah: selaras dengan UPLOAD_MAX_KB & config/ulaman.php.
     <IfModule mod_php.c>
-        php_value upload_max_filesize 10M
-        php_value post_max_size 10M
+        php_value upload_max_filesize 128M
+        php_value post_max_size 512M
+        php_value max_input_time 600
+        php_value max_execution_time 600
     </IfModule>
 
     RewriteEngine On

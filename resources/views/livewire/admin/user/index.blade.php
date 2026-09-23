@@ -1,3 +1,4 @@
+@use('App\Support\Uploads')
 <div>
     {{-- HEADER --}}
     <x-header title="{{ __('User Management') }}" subtitle="{{ __('Registered accounts') }}" separator progress-indicator>
@@ -123,14 +124,15 @@
 
             {{-- Foto Profil --}}
             <div class="flex items-center gap-4 mb-4">
-                @if ($profile_photo)
+                @if ($profile_photo && Uploads::isPreviewableImage($profile_photo))
                     <x-avatar :image="$profile_photo->temporaryUrl()" class="!w-16 !h-16" />
                 @elseif($existing_photo)
                     <x-avatar :image="asset('storage/' . $existing_photo)" class="!w-16 !h-16" />
                 @else
                     <x-avatar icon="o-user" class="!w-16 !h-16" />
                 @endif
-                <x-file wire:model="profile_photo" label="{{ __('Profile Photo') }}" accept="image/*" hint="Max 2MB" />
+                <x-file wire:model="profile_photo" label="{{ __('Profile Photo') }}"
+                    accept="image/jpeg,image/png,image/webp" hint="Max 2MB" />
             </div>
 
             <x-input label="{{ __('Name') }}" wire:model="name" icon="o-user" required />

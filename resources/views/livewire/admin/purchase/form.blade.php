@@ -2,6 +2,7 @@
     use App\Enums\BundleType;
     use App\Enums\DiscountType;
     use App\Support\Money;
+    use App\Support\Uploads;
 
     $diskonOptions = collect(DiscountType::cases())->map(fn($c) => ['id' => $c->value, 'name' => $c->label()])->all();
     $bundleOptions = collect(BundleType::cases())->map(fn($c) => ['id' => $c->value, 'name' => $c->label()])->all();
@@ -289,16 +290,28 @@
         <x-card class="bg-base-100 shadow-sm mb-6">
             <x-slot:title><span class="font-bold text-lg">{{ __('Bukti Transfer') }}</span></x-slot:title>
 
-            <div x-data="buktiTransferUpload">
-                <input type="file" x-ref="input" accept="image/*,application/pdf" multiple
+            <div x-data="buktiTransferUpload({{ $maxMb }})">
+                <input type="file" x-ref="input" accept="image/jpeg,image/png,image/webp,application/pdf" multiple
                     class="file-input file-input-bordered w-full" @change="handle($event)" :disabled="uploading" />
                 <div class="text-xs text-gray-400 mt-1">
-                    {{ __('Max 5 files, 50 MB each. JPG/PNG/WEBP/PDF. Images are compressed on your device.') }}
+                    {{ __('Max 5 files, :size each. JPG/PNG/WEBP/PDF. Images are compressed on your device.', ['size' => $maxMb.' MB']) }}
                 </div>
                 <div x-show="uploading" class="mt-2">
                     <progress class="progress progress-primary w-full" :value="progress" max="100"></progress>
                     <span class="text-xs" x-text="`${progress}%`"></span>
                 </div>
+
+                {{-- Berkas yang ditolak di klien (mis. HEIC dari iPhone / melebihi batas) --}}
+                <template x-if="errors.length">
+                    <div class="alert alert-error items-start mt-3 text-sm">
+                        <x-icon name="o-exclamation-triangle" class="w-5 h-5 shrink-0" />
+                        <div class="flex flex-col gap-1">
+                            <template x-for="message in errors" :key="message">
+                                <span x-text="message"></span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             @error('buktiTransfers.*')
@@ -311,7 +324,7 @@
                     @foreach ($buktiTransfers as $idx => $file)
                         <div class="relative group border border-base-300 rounded-lg p-2 flex flex-col items-center justify-center h-28"
                             wire:key="pending-bt-{{ $idx }}">
-                            @if (str_starts_with($file->getMimeType() ?? '', 'image/'))
+                            @if (Uploads::isPreviewableImage($file))
                                 <img src="{{ $file->temporaryUrl() }}" class="w-full h-full object-cover rounded" />
                             @else
                                 <x-icon name="o-document" class="w-8 h-8 text-gray-400" />

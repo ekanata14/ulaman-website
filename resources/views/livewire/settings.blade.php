@@ -1,3 +1,4 @@
+@use('App\Support\Uploads')
 <div class="max-w-4xl mx-auto">
     <x-header title="{{ __('Settings') }}" subtitle="{{ __('Manage your account and preferences') }}" separator />
 
@@ -10,8 +11,9 @@
                 {{-- HEADER PROFIL BERDASARKAN ROLE --}}
                 <div class="flex items-center gap-4 mb-8 p-4 bg-base-200/50 rounded-xl border border-base-300">
                     <div class="relative group">
-                        {{-- Logika Preview: Cek file baru (temp) -> file lama (DB) -> default null --}}
-                        <x-avatar :image="$profile_photo
+                        {{-- Logika Preview: Cek file baru (temp, hanya tipe yang bisa
+                             dirender browser) -> file lama (DB) -> default null --}}
+                        <x-avatar :image="$profile_photo && Uploads::isPreviewableImage($profile_photo)
                             ? $profile_photo->temporaryUrl()
                             : ($existing_photo
                                 ? asset('storage/' . $existing_photo)
@@ -47,7 +49,8 @@
 
                         <div class="md:col-span-2">
                             {{-- Input file disesuaikan ke profile_photo --}}
-                            <x-file label="{{ __('Change Profile Photo') }}" wire:model="profile_photo" accept="image/*"
+                            <x-file label="{{ __('Change Profile Photo') }}" wire:model="profile_photo"
+                                accept="image/jpeg,image/png,image/webp"
                                 hint="{{ __('Max 2MB. Square ratio recommended.') }}" />
                         </div>
                     </div>

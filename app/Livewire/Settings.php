@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Actions\User\UpdateUserAction;
 use App\DTOs\User\UserData;
 use App\Models\User;
+use App\Support\Uploads;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -68,7 +69,7 @@ class Settings extends Component
         $this->validate([
             'name' => 'required|min:3',
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'profile_photo' => 'nullable|image|max:2048',
+            'profile_photo' => 'nullable|mimetypes:'.implode(',', Uploads::imageMimes()).'|max:2048',
         ]);
 
         $dto = new UserData(
